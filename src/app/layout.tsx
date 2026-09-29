@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Vazirmatn } from 'next/font/google';
 
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 
 import { ReactQueryProvider } from '@/provider/ReactQueryProvider';
 
@@ -18,9 +18,7 @@ export const metadata: Metadata = {
   description: 'an commerce website ',
 };
 
-export default function RootLayout({
-  children,
-}: LayoutProps<'/'>): ReactElement {
+export default function RootLayout({ children }: LayoutProps<'/'>): ReactNode {
   return (
     <html lang="fa" dir="rtl" className={`${vazirmatn.variable} antialiased`}>
       <body>

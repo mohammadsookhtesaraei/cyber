@@ -1,7 +1,8 @@
+
 {
   "plugins": [
-    "prettier-plugin-tailwindcss",
-    "@trivago/prettier-plugin-sort-imports"
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
   ],
   "semi": true,
   "singleQuote": true,
@@ -9,17 +10,31 @@
   "trailingComma": "es5",
   "bracketSpacing": true,
   "arrowParens": "always",
-
   "importOrder": [
     "^(next)(/.*)?$",
     "^(react|react-dom)(/.*)?$",
     "^@tanstack(/.*)?$",
+    "^react-hook-form(/.*)?$",
+    "^@hookform/resolvers(/.*)?$",
+    "^zod(/.*)?$",
+    "^clsx(/.*)?$",
+    "^framer-motion(/.*)?$",
+    "^axios(/.*)?$",
     "<THIRD_PARTY_MODULES>",
     "^@/components(/.*)?$",
+    "^@/layout(/.*)?$",
+    "^@/provider(/.*)?$",
+    "^@/hook(/.*)?$",
+    "^@/services(/.*)?$",
+    "^@/schemas(/.*)?$",
+    "^@/types(/.*)?$",
+    "^@/utils(/.*)?$",
+    "^@/lib(/.*)?$",
+    "^@/model(/.*)?$",
     "^@/.*$",
     "^.+\\.css$"
   ],
-
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true
 }
+

@@ -10,6 +10,10 @@
     "icons": "svgr --out-dir src/components/icons public/assets"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie": "^2.0.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.10.2",
     "next": "16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8"

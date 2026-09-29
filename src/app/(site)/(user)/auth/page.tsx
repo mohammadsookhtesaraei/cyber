@@ -1,8 +1,9 @@
-import { ReactElement } from "react"
+'use client';
 
-const AuthPage = ():ReactElement => {
-  return (
-    <div>page</div>
-  )
-}
+import { ReactElement } from 'react';
+import { useState } from 'react';
+
+const AuthPage = (): ReactElement => {
+  return <div>page</div>;
+};
 export default AuthPage;

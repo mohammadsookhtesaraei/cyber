@@ -1,29 +1,31 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
+import { Vazirmatn } from 'next/font/google';
 
+import { ReactElement } from 'react';
 
-import {Vazirmatn} from "next/font/google";
-import "./globals.css";
+import { ReactQueryProvider } from '@/provider/ReactQueryProvider';
 
+import './globals.css';
 
-const vazirmatn=Vazirmatn({
-  subsets:["arabic","latin"],
-  display:"swap",
-  variable:"--font-vazir"
-})
+const vazirmatn = Vazirmatn({
+  subsets: ['arabic', 'latin'],
+  display: 'swap',
+  variable: '--font-vazir',
+});
 
 export const metadata: Metadata = {
-  title: "Cyper",
-  description: "an commerce website ",
+  title: 'Cyper',
+  description: 'an commerce website ',
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: LayoutProps<'/'>): ReactElement {
   return (
-    <html
-      lang="fa"
-      dir="rtl"
-      className={`${vazirmatn.variable} antialiased`}
-    >
-      <body>{children}</body>
+    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} antialiased`}>
+      <body>
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+      </body>
     </html>
   );
 }

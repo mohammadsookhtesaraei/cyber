@@ -11,7 +11,7 @@ const InputForm = ({ label, error, ...rest }: InputFormProps): ReactElement => {
   const id = useId();
   return (
     <div className="relative my-6">
-      <label className="mb-2 block text-sm" htmlFor={id}>
+      <label className="text-muted mb-2 block text-sm" htmlFor={id}>
         {label}
       </label>
       <input
@@ -19,12 +19,13 @@ const InputForm = ({ label, error, ...rest }: InputFormProps): ReactElement => {
         className={clsx(
           error
             ? 'bg-surface h-12 w-full rounded-xl border border-rose-400 px-3.5 text-left text-rose-400 focus:outline-none'
-            : 'bg-surface border-border focus:shadow-surface h-12 w-full rounded-xl border px-3.5 text-left text-mauve-500 focus:shadow-md focus:outline-none'
+            : 'bg-surface border-border focus:shadow-surface text-primary h-12 w-full rounded-xl border px-3.5 text-left focus:shadow-md focus:outline-none'
         )}
         placeholder="09111254645"
         id={id}
         type="text"
         {...rest}
+        autoComplete="none"
       />
       <span
         className={clsx(

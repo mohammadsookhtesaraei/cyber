@@ -1,15 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
-import OtpRateLimit from "@/model/OtpRateLimit";
-import { hashOtp } from "@/utils/auth";
+import { hashOtp } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
+
+import OtpRateLimit from '@/model/OtpRateLimit';
+import User from '@/model/User';
 
 const OTP_WINDOW_MS = 2 * 60 * 1000;
 const OTP_COOLDOWN_MS = 30 * 1000;
 const MAX_OTP_REQUESTS = 3;
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<
+  NextResponse<{
+    message: string;
+  }>
+> {
   try {
     await connectDb();
 
@@ -21,7 +26,7 @@ export async function POST(req: Request) {
     if (!phoneNumber) {
       return NextResponse.json(
         {
-          message: "Phone number is required",
+          message: 'شماره موبایل معتبر وارد کنید',
         },
         {
           status: 400,
@@ -58,10 +63,7 @@ export async function POST(req: Request) {
     }
 
     // Check cooldown
-    if (
-      rateLimit.requestCount > 0 &&
-      timeSinceLastRequest < OTP_COOLDOWN_MS
-    ) {
+    if (rateLimit.requestCount > 0 && timeSinceLastRequest < OTP_COOLDOWN_MS) {
       const retryAfter = Math.ceil(
         (OTP_COOLDOWN_MS - timeSinceLastRequest) / 1000
       );
@@ -86,7 +88,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           message:
-            "تعداد درخواست‌های OTP بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید",
+            'تعداد درخواست‌های OTP بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید',
           retryAfter,
         },
         {
@@ -107,21 +109,17 @@ export async function POST(req: Request) {
       });
     }
 
-  // generate otp
-  const otp = Math.floor(
-  100000 + Math.random() * 900000
-).toString();
+    // generate otp
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-const hashedOtp = hashOtp(otp);
+    const hashedOtp = hashOtp(otp);
 
-const expiresIn = new Date(
-  now.getTime() + 2 * 60 * 1000
-);
+    const expiresIn = new Date(now.getTime() + 2 * 60 * 1000);
 
-user.otp = {
-  code: hashedOtp,
-  expiresIn,
-};
+    user.otp = {
+      code: hashedOtp,
+      expiresIn,
+    };
     await user.save();
 
     // Update rate limit
@@ -131,7 +129,7 @@ user.otp = {
     await rateLimit.save();
 
     return NextResponse.json({
-      message: "OTP sent successfully",
+      message: 'کد تایید با موفقیت ارسال شد',
       userId: user._id,
 
       // فقط برای Demo
@@ -142,7 +140,7 @@ user.otp = {
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

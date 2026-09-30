@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 :root {
-  --white: #ffffff;
-  --black: #000000;
+  --bg-white: #ffffff;
+  --bg: #ffff;
 
   --primary: #2e2e2e;
   --secondary: #656565;
@@ -10,10 +10,29 @@
 
   --background-muted: #f5f5f5;
   --surface: #f6f6f6;
-
   --border: #cfcfcf;
 
   --danger: #ff0000;
+
+  &.dark {
+    --bg: #161616;
+    --bg-white: #0d0d0d;
+    --primary: #ffffff;
+    --secondary: #a5a5a5;
+    --muted: #777;
+    --background-muted: #1f1f1f;
+    --surface: #1c1c1c;
+    --border: #333;
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--black) inset;
+  -webkit-text-fill-color: var(--white);
+  caret-color: var(--white);
 }
 
 @layer base {
@@ -23,10 +42,10 @@
 }
 
 @theme {
-  --color-white: var(--white);
-  --color-black: var(--black);
+  --color-bg-white: var(--bg-white);
+  --color-bg: var(--bg);
   --color-primary: var(--primary);
-  --color-seconday: var(--secondary);
+  --color-secondary: var(--secondary);
   --color-muted: var(--muted);
   --color-bg-muted: var(--background-muted);
   --color-surface: var(--surface);

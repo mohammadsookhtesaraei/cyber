@@ -21,10 +21,10 @@ export const sendOtpFn = async (phoneNumber: string): Promise<SentOtp> => {
 
 // verifyOtpfn
 
-export const verifyOtpFn = async (
-  phoneNumber: string,
-  otp: string
-): Promise<verifyOtp> => {
-  const { data } = await app.post('/auth/verify-otp', { phoneNumber, otp });
+export const verifyOtpFn = async (valuse: {
+  phoneNumber: string;
+  otp: string;
+}): Promise<verifyOtp> => {
+  const { data } = await app.post('/auth/verify-otp', valuse);
   return data;
 };

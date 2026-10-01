@@ -1,11 +1,13 @@
-import { ReactElement} from "react"
+import { ReactElement } from 'react';
 
-type HeaderProps={};
+import ThemeToggle from './components/ThemeToggle';
 
- const Header = ({}:HeaderProps):ReactElement => {
+const Header = (): ReactElement => {
   return (
-    <div className="">Hello from Header</div>
+    <div className="">
+      <ThemeToggle />
+    </div>
   );
-}
+};
 
 export default Header;

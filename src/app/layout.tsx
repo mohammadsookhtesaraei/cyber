@@ -6,6 +6,7 @@ import { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 
 import { ReactQueryProvider } from '@/provider/ReactQueryProvider';
+import ThemeProvider from '@/provider/ThemeProvider';
 
 import './globals.css';
 
@@ -22,12 +23,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>): ReactNode {
   return (
-    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} antialiased`}>
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`${vazirmatn.variable} antialiased`}
+      suppressHydrationWarning
+    >
       <body>
-        <ReactQueryProvider>
-          {children}
-          <Toaster />
-        </ReactQueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          enableColorScheme
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            {children}
+            <Toaster />
+          </ReactQueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

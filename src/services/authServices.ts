@@ -1,17 +1,11 @@
 import app from '@/services/httpService';
 
-type SentOtp = {
-  message: string;
-  userId: string;
-  otp: string;
-};
-
-type verifyOtp = {
-  message: string;
-  userId: string;
-  isVerifiedPhoneNumber: boolean;
-  isActive: boolean;
-};
+import {
+  AuthenticatedUserResponse,
+  CheckProfile,
+  SentOtp,
+  verifyOtp,
+} from '@/types/user-interface';
 
 // send otp fn
 export const sendOtpFn = async (phoneNumber: string): Promise<SentOtp> => {
@@ -34,7 +28,13 @@ export const verifyOtpFn = async (valuse: {
 export const checkProfileFn = async (valuse: {
   name: string;
   email: string;
-}): Promise<verifyOtp> => {
+}): Promise<CheckProfile> => {
   const { data } = await app.post('/auth/check-profile', valuse);
+  return data;
+};
+
+// profile fn
+export const profileFn = async (): Promise<AuthenticatedUserResponse> => {
+  const { data } = await app.get('/auth/profile');
   return data;
 };

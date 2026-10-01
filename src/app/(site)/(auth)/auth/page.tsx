@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useForm } from 'react-hook-form';
 
@@ -31,6 +31,7 @@ const resend = 60;
 
 const AuthPage = (): ReactElement => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // step state
   const [step, setStep] = useState(1);
@@ -46,6 +47,7 @@ const AuthPage = (): ReactElement => {
     handleSubmit,
     formState: { errors },
     getValues,
+    reset: otpFormReset,
   } = useForm({
     resolver: zodResolver(phoneNumberSchema),
     defaultValues: {
@@ -94,16 +96,23 @@ const AuthPage = (): ReactElement => {
       mutationFn: verifyOtpFn,
     });
 
-  // hanlde- verify-otp
+  // handle- verify-otp
   const handleVerifyOtp = async (value: VerifyOtpFormType): Promise<void> => {
     const phoneNumber = getValues('phoneNumber');
     const data = { phoneNumber, otp: value.otp };
     try {
       const { isActive, message } = await mutateAsyncVerify(data);
       toast.success(message);
+      reset();
+      otpFormReset();
+
       if (!isActive) {
         router.push('/check-profile');
       } else {
+        queryClient.invalidateQueries({
+          queryKey: ['get-user'],
+        });
+
         router.push('/');
       }
     } catch (error) {

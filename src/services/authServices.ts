@@ -28,3 +28,13 @@ export const verifyOtpFn = async (valuse: {
   const { data } = await app.post('/auth/verify-otp', valuse);
   return data;
 };
+
+// check-profile
+
+export const checkProfileFn = async (valuse: {
+  name: string;
+  email: string;
+}): Promise<verifyOtp> => {
+  const { data } = await app.post('/auth/check-profile', valuse);
+  return data;
+};

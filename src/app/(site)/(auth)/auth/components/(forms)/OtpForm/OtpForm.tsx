@@ -3,7 +3,8 @@ import { BaseSyntheticEvent, ReactElement } from 'react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
 import { SendOtpFormType } from '../../../page';
-import InputForm from '../components/InputForm/InputForm';
+
+import InputForm from '@/components/ui/InputForm/InputForm';
 
 type OtpFormProps = {
   register: UseFormRegister<SendOtpFormType>;
@@ -29,6 +30,8 @@ const OtpForm = ({
           label="شماره  موبایل"
           error={errors.phoneNumber?.message}
           {...register('phoneNumber')}
+          placeholder="09111254645"
+          dir="ltr"
         />
         <button
           disabled={isPending}

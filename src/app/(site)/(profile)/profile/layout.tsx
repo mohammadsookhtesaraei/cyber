@@ -11,7 +11,7 @@ const ProfileLayout = ({ children }: ProfileLayoutProps): ReactElement => {
     <Layout>
       <div className="wrapper grid grid-cols-3 gap-4 py-24 lg:py-32">
         <ProfileSideBar />
-        <div className="col-span-2 bg-blue-300">{children}</div>
+        <div className="col-span-2">{children}</div>
       </div>
     </Layout>
   );

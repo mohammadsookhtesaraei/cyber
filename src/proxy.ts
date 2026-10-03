@@ -21,7 +21,16 @@ export async function proxy(
     }
   }
 
-  //  اینجا اگه کاربر پروفایلشو تکمیل کرده از قبل و ترو هست دیگه بصه روت چک پروفایل نتونه بره
+  // اگر کاربر لاگین نیست نره به چگ پرو فایل
+  if (pathName.startsWith('/check-profile')) {
+    const user = await proxyAuth(request);
+    if (!user) {
+      const authUrl = new URL('/auth', request.url);
+      return NextResponse.redirect(authUrl);
+    }
+  }
+
+  //  اینجا اگه کاربر پروفایلشو تکمیل کرده از قبل و ترو هست دیگه به روت چک پروفایل نتونه بره
   if (pathName.startsWith('/check-profile')) {
     const user = await proxyAuth(request);
     if (user?.isActive === true) {
@@ -30,7 +39,7 @@ export async function proxy(
     }
   }
 
-  //  این مگه اگه کاربر ثبت نام مرده ولی پروفایلش رو تکیمل نکرده و فعال نیست نره به پروفایل کاربری
+  //  این میگه اگه کاربر ثبت نام کرده ولی پروفایلش رو تکمیل نکرده و فعال نیست نره به پروفایل کاربری
   if (pathName.startsWith('/profile')) {
     const user = await proxyAuth(request);
     if (!user?.name?.trim() || !user?.email?.trim()) {
@@ -39,7 +48,7 @@ export async function proxy(
     }
   }
 
-  //  این اگه  کاربر لاگین هست کلا نره به صفحه ورود و ثببت نام
+  //  این اگه  کاربر لاگین هست کلا نره به صفحه ورود و ثبت نام
   if (pathName.startsWith('/auth')) {
     const user = await proxyAuth(request);
     if (user) {
@@ -48,7 +57,7 @@ export async function proxy(
     }
   }
 
-  //  اگر کاربر ادیمن نیست دسترسی هاش به روت های کاربر محدود بشه
+  //  اگر کاربر ادمین نیست دسترسی هاش به روت های کاربر محدود بشه
   if (pathName.startsWith('/admin')) {
     const user = await proxyAuth(request);
     if (!user) {

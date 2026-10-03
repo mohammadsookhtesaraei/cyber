@@ -2,6 +2,8 @@ import Link from 'next/link';
 
 import { ReactElement } from 'react';
 
+import LogoOut from '@/app/(site)/(profile)/profile/components/LogoOut';
+
 const ProfileSideBar = (): ReactElement => {
   return (
     <div className="col-span-1">
@@ -24,6 +26,7 @@ const ProfileSideBar = (): ReactElement => {
             </Link>
           </li>
         </ul>
+        <LogoOut />
       </div>
     </div>
   );

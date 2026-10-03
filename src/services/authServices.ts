@@ -3,6 +3,7 @@ import app from '@/services/httpService';
 import {
   AuthenticatedUserResponse,
   CheckProfile,
+  LogOutResponse,
   SentOtp,
   verifyOtp,
 } from '@/types/user-interface';
@@ -37,4 +38,10 @@ export const checkProfileFn = async (valuse: {
 export const profileFn = async (): Promise<AuthenticatedUserResponse> => {
   const { data } = await app.get('/auth/profile');
   return data;
+};
+
+// log out
+
+export const logOutFn = (): Promise<LogOutResponse> => {
+  return app.post('/auth/logout');
 };

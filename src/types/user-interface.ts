@@ -44,3 +44,7 @@ export interface AuthenticatedUserResponse {
   message: string;
   user: AuthenticatedUser;
 }
+
+export interface LogOutResponse {
+  message: string;
+}

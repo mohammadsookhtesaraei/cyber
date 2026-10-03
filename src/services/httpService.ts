@@ -11,7 +11,23 @@ app.interceptors.request.use(
 
 app.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error)
+  async (error) => {
+    const orginalConfig = error.config;
+    if (error.response.status === 401 && !orginalConfig._retry) {
+      orginalConfig._retry = true;
+
+      try {
+        const { data } = await axios.get(`${API_URL}/auth/refresh-token`, {
+          withCredentials: true,
+        });
+        if (data) return app(orginalConfig);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default app;

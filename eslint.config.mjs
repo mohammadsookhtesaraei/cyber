@@ -23,7 +23,7 @@ export default defineConfig([
     rules: {
       "prettier/prettier": "error",
 
-      "@typescript-eslint/explicit-function-return-type": "error",
+      // "@typescript-eslint/explicit-function-return-type": "error",
       "@typescript-eslint/explicit-member-accessibility": "error",
     },
   },

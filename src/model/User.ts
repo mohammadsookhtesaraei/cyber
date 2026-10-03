@@ -1,11 +1,32 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
+
+/* =========================
+   Cart Types
+========================= */
+
+export interface ICartProduct {
+  product: mongoose.Types.ObjectId;
+  quantity: number;
+}
+
+export interface ICart {
+  products: ICartProduct[];
+  coupon: mongoose.Types.ObjectId | null;
+}
+
+/* =========================
+   User Type
+========================= */
 
 export interface IUser extends Document {
   phoneNumber: string;
 
   name?: string;
+
   email?: string;
+
   biography?: string;
+
   avatarUrl?: string | null;
 
   otp?: {
@@ -16,21 +37,71 @@ export interface IUser extends Document {
   resetLink?: string | null;
 
   isVerifiedPhoneNumber: boolean;
+
   isActive: boolean;
 
   likedProducts: mongoose.Types.ObjectId[];
+
   Products: mongoose.Types.ObjectId[];
 
-  role: "USER" | "ADMIN";
+  role: 'USER' | 'ADMIN';
 
-  cart: {
-    products: mongoose.Types.ObjectId[];
-    coupon: mongoose.Types.ObjectId | null;
-  };
+  cart: ICart;
 
   createdAt: Date;
+
   updatedAt: Date;
 }
+
+/* =========================
+   Cart Product Schema
+========================= */
+
+const cartProductSchema = new Schema<ICartProduct>(
+  {
+    product: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true,
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      default: 1,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+/* =========================
+   Cart Schema
+========================= */
+
+const cartSchema = new Schema<ICart>(
+  {
+    products: {
+      type: [cartProductSchema],
+      default: [],
+    },
+
+    coupon: {
+      type: Schema.Types.ObjectId,
+      ref: 'Coupon',
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+/* =========================
+   User Schema
+========================= */
 
 const userSchema = new Schema<IUser>(
   {
@@ -56,7 +127,7 @@ const userSchema = new Schema<IUser>(
 
     biography: {
       type: String,
-      default: "",
+      default: '',
     },
 
     avatarUrl: {
@@ -76,6 +147,7 @@ const userSchema = new Schema<IUser>(
 
     resetLink: {
       type: String,
+      default: null,
     },
 
     isVerifiedPhoneNumber: {
@@ -91,36 +163,29 @@ const userSchema = new Schema<IUser>(
     likedProducts: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ],
 
     Products: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ],
 
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
-      default: "USER",
+      enum: ['USER', 'ADMIN'],
+      default: 'USER',
     },
 
     cart: {
-      products: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "Product",
-        },
-      ],
-
-      coupon: {
-        type: Schema.Types.ObjectId,
-        ref: "Coupon",
-        default: null,
-      },
+      type: cartSchema,
+      default: () => ({
+        products: [],
+        coupon: null,
+      }),
     },
   },
   {
@@ -128,8 +193,10 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-const User =
-  mongoose.models.User ||
-  mongoose.model<IUser>("User", userSchema);
+/* =========================
+   Model
+========================= */
+
+const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
 
 export default User;

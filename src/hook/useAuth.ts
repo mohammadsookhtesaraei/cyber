@@ -12,6 +12,7 @@ export const useGetProfile = (): {
     queryKey: ['get-user'],
     queryFn: profileFn,
     retry: false,
+    refetchOnWindowFocus: true,
   });
 
   return { data, isPending };

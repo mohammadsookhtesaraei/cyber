@@ -1,80 +1,75 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// این یک تابع هست که ما ری کویست  پروکسی یا همون میدلور قدیم رو رو بهش پاس میدیم
-// و یک درخواست میزنیم سمت بکند و بصورت دستی کوکی ها رو از این  ریکویست میدل ور میگیریم و توی هدر ریکویستمون دستی ست می کنیم
-// تا بکند از طریق اکسس توکن و رفرش توکنش متوجه بشه که کیه کاربر ما با توجه به اطلاعات کاربر  روت هارو پروتکت می کنیم
 import { proxyAuth } from '@/utils/proxyAuth';
 
-export async function proxy(
-  request: NextRequest
-): Promise<NextResponse<unknown>> {
-  // این میاد روت فعلی که درخواست میره سمتش رو میگیره
-  const pathName = request.nextUrl.pathname;
+const cookieOptions = {
+  httpOnly: true, // جاوااسکریپت نمی‌تواند کوکی را بخواند
+  secure: process.env.NODE_ENV === 'production', // فقط روی اتصال امن ارسال می‌شود
+  sameSite: 'lax' as const,
+  path: '/',
+};
 
-  //  اگه رفت به روت پروفایل و کاربر لاگین نبود یا همون اکسس توکن نداشت بره به صفحه ورود یا ثبت نام
-  if (pathName.startsWith('/profile')) {
-    const user = await proxyAuth(request);
-    if (!user) {
-      const authUrl = new URL('/auth', request.url);
-      return NextResponse.redirect(authUrl);
+export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const { user, tokens } = await proxyAuth(request);
+
+  // آدرسی که کاربر باید به آن برود و اگر خالی بماند همان صفحه را می‌بیند
+  let redirectTo = '';
+
+  if (!user) {
+    // کاربر وارد نشده فقط صفحه ورود را می‌تواند ببیند
+    if (!path.startsWith('/auth')) redirectTo = '/auth';
+  } else {
+    // کاربر واردشده صفحه ورود را نباید ببیند
+    if (path.startsWith('/auth')) redirectTo = '/profile';
+
+    // فقط ادمین وارد پنل مدیریت می‌شود
+    if (path.startsWith('/admin') && user.role !== 'ADMIN') redirectTo = '/';
+
+    // کاربر فعال به صفحه تکمیل پروفایل نیازی ندارد
+    if (path.startsWith('/check-profile') && user.isActive) {
+      redirectTo = '/profile';
+    }
+
+    // کاربری که نام یا ایمیل ندارد باید پروفایلش را تکمیل کند
+    if (path.startsWith('/profile') && (!user.name || !user.email)) {
+      redirectTo = '/check-profile';
     }
   }
 
-  // اگر کاربر لاگین نیست نره به چگ پرو فایل
-  if (pathName.startsWith('/check-profile')) {
-    const user = await proxyAuth(request);
-    if (!user) {
-      const authUrl = new URL('/auth', request.url);
-      return NextResponse.redirect(authUrl);
-    }
+  // توکن جدید را روی درخواست می‌گذاریم تا صفحه‌ی سروری هم آن را ببیند
+  if (tokens) {
+    request.cookies.set('accessToken', tokens.accessToken);
+    request.cookies.set('refreshToken', tokens.refreshToken);
   }
 
-  //  اینجا اگه کاربر پروفایلشو تکمیل کرده از قبل و ترو هست دیگه به روت چک پروفایل نتونه بره
-  if (pathName.startsWith('/check-profile')) {
-    const user = await proxyAuth(request);
-    if (user?.isActive === true) {
-      const profileUrl = new URL('/profile', request.url);
-      return NextResponse.redirect(profileUrl);
-    }
+  // یا ریدایرکت می‌کنیم یا اجازه می‌دهیم صفحه باز شود
+  const response = redirectTo
+    ? NextResponse.redirect(new URL(redirectTo, request.url))
+    : NextResponse.next({ request });
+
+  // اگر توکن جدید گرفتیم، آن را در مرورگر ذخیره می‌کنیم
+  if (tokens) {
+    response.cookies.set('accessToken', tokens.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60, // پانزده دقیقه
+    });
+    response.cookies.set('refreshToken', tokens.refreshToken, {
+      ...cookieOptions,
+      maxAge: 30 * 24 * 60 * 60, // سی روز
+    });
   }
 
-  //  این میگه اگه کاربر ثبت نام کرده ولی پروفایلش رو تکمیل نکرده و فعال نیست نره به پروفایل کاربری
-  if (pathName.startsWith('/profile')) {
-    const user = await proxyAuth(request);
-    if (!user?.name?.trim() || !user?.email?.trim()) {
-      const checkProfile = new URL('/check-profile', request.url);
-      return NextResponse.redirect(checkProfile);
-    }
+  // اگر کاربر نبود، کوکی‌های خراب را پاک می‌کنیم
+  if (!user) {
+    response.cookies.delete('accessToken');
+    response.cookies.delete('refreshToken');
   }
 
-  //  این اگه  کاربر لاگین هست کلا نره به صفحه ورود و ثبت نام
-  if (pathName.startsWith('/auth')) {
-    const user = await proxyAuth(request);
-    if (user) {
-      const profileUrl = new URL('/profile', request.url);
-      return NextResponse.redirect(profileUrl);
-    }
-  }
-
-  //  اگر کاربر ادمین نیست دسترسی هاش به روت های کاربر محدود بشه
-  if (pathName.startsWith('/admin')) {
-    const user = await proxyAuth(request);
-    if (!user) {
-      const authUrl = new URL('/auth', request.url);
-      return NextResponse.redirect(authUrl);
-    }
-    if (user && user?.role !== 'ADMIN') {
-      const homeUrl = new URL('/', request.url);
-      return NextResponse.redirect(homeUrl);
-    }
-  }
-
-  //  دراخرم در خواست ادامه پیدا کنه
-  return NextResponse.next();
+  return response;
 }
 
-//  این ها روی این روت ها اعمال بشه
 export const config = {
   matcher: [
     '/profile/:path*',

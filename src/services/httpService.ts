@@ -13,13 +13,17 @@ app.interceptors.response.use(
   (response) => response,
   async (error) => {
     const orginalConfig = error.config;
-    if (error.response.status === 401 && !orginalConfig._retry) {
+    if (error.response?.status === 401 && !orginalConfig._retry) {
       orginalConfig._retry = true;
 
       try {
-        const { data } = await axios.post(`${API_URL}/auth/refresh-token`, {
-          withCredentials: true,
-        });
+        const { data } = await axios.post(
+          `${API_URL}/auth/refresh-token`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
         if (data) return app(orginalConfig);
       } catch (error) {
         return Promise.reject(error);

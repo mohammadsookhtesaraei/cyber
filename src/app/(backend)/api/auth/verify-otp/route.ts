@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server";
-
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
-import Session from "@/model/Session";
-import OtpVerifyRateLimit from "@/model/OtpVerifyRateLimit";
+import { NextResponse } from 'next/server';
 
 import {
   generateAccessToken,
   generateRefreshToken,
-  hashRefreshToken,
   hashOtp,
-} from "@/utils/auth";
+  hashRefreshToken,
+} from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
+
+import OtpVerifyRateLimit from '@/model/OtpVerifyRateLimit';
+import Session from '@/model/Session';
+import User from '@/model/User';
 
 const OTP_VERIFY_WINDOW_MS = 2 * 60 * 1000;
 
@@ -30,8 +30,7 @@ export async function POST(req: Request) {
     if (!phoneNumber || !otp) {
       return NextResponse.json(
         {
-          message:
-            "شماره موبایل و کد تایید الزامی است",
+          message: 'شماره موبایل و کد تایید الزامی است',
         },
         {
           status: 400,
@@ -42,31 +41,25 @@ export async function POST(req: Request) {
     const now = new Date();
 
     // Find OTP verification rate limit
-    let rateLimit =
-      await OtpVerifyRateLimit.findOne({
-        phoneNumber,
-      });
+    let rateLimit = await OtpVerifyRateLimit.findOne({
+      phoneNumber,
+    });
 
     // Create rate limit record if it does not exist
     if (!rateLimit) {
-      rateLimit =
-        await OtpVerifyRateLimit.create({
-          phoneNumber,
-          attemptCount: 0,
-          windowStart: now,
-        });
+      rateLimit = await OtpVerifyRateLimit.create({
+        phoneNumber,
+        attemptCount: 0,
+        windowStart: now,
+      });
     }
 
     // Calculate current rate-limit window
     const timeSinceWindowStart =
-      now.getTime() -
-      rateLimit.windowStart.getTime();
+      now.getTime() - rateLimit.windowStart.getTime();
 
     // Reset attempts if window has expired
-    if (
-      timeSinceWindowStart >=
-      OTP_VERIFY_WINDOW_MS
-    ) {
+    if (timeSinceWindowStart >= OTP_VERIFY_WINDOW_MS) {
       rateLimit.attemptCount = 0;
       rateLimit.windowStart = now;
 
@@ -74,20 +67,15 @@ export async function POST(req: Request) {
     }
 
     // Check maximum verification attempts
-    if (
-      rateLimit.attemptCount >=
-      MAX_OTP_VERIFY_ATTEMPTS
-    ) {
+    if (rateLimit.attemptCount >= MAX_OTP_VERIFY_ATTEMPTS) {
       const retryAfter = Math.ceil(
-        (OTP_VERIFY_WINDOW_MS -
-          timeSinceWindowStart) /
-          1000
+        (OTP_VERIFY_WINDOW_MS - timeSinceWindowStart) / 1000
       );
 
       return NextResponse.json(
         {
           message:
-            "تعداد تلاش‌های تایید OTP بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید",
+            'تعداد تلاش‌های تایید OTP بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید',
           retryAfter,
         },
         {
@@ -104,8 +92,7 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json(
         {
-          message:
-            "کاربری با این شماره پیدا نشد",
+          message: 'کاربری با این شماره پیدا نشد',
         },
         {
           status: 404,
@@ -117,7 +104,7 @@ export async function POST(req: Request) {
     if (!user.otp) {
       return NextResponse.json(
         {
-          message: "کد تایید یافت نشد",
+          message: 'کد تایید یافت نشد',
         },
         {
           status: 400,
@@ -136,13 +123,11 @@ export async function POST(req: Request) {
       await rateLimit.save();
 
       const remainingAttempts =
-        MAX_OTP_VERIFY_ATTEMPTS -
-        rateLimit.attemptCount;
+        MAX_OTP_VERIFY_ATTEMPTS - rateLimit.attemptCount;
 
       return NextResponse.json(
         {
-          message:
-            "کد تایید صحیح نمی باشد",
+          message: 'کد تایید صحیح نمی باشد',
           remainingAttempts,
         },
         {
@@ -155,8 +140,7 @@ export async function POST(req: Request) {
     if (now > user.otp.expiresIn) {
       return NextResponse.json(
         {
-          message:
-            "کد تایید منقضی شده است",
+          message: 'کد تایید منقضی شده است',
         },
         {
           status: 400,
@@ -178,36 +162,20 @@ export async function POST(req: Request) {
     });
 
     // Get device information
-    const userAgent =
-      req.headers.get("user-agent") ||
-      undefined;
+    const userAgent = req.headers.get('user-agent') || undefined;
 
-    const forwardedFor =
-      req.headers.get("x-forwarded-for");
+    const forwardedFor = req.headers.get('x-forwarded-for');
 
-    const ipAddress =
-      forwardedFor
-        ?.split(",")[0]
-        ?.trim() ||
-      undefined;
+    const ipAddress = forwardedFor?.split(',')[0]?.trim() || undefined;
 
     // Generate access token
-    const accessToken =
-      generateAccessToken(
-        user._id.toString(),
-        user.role
-      );
+    const accessToken = generateAccessToken(user._id.toString(), user.role);
 
     // Generate refresh token
-    const refreshToken =
-      generateRefreshToken(
-        user._id.toString(),
-        user.role
-      );
+    const refreshToken = generateRefreshToken(user._id.toString(), user.role);
 
     // Hash refresh token
-    const refreshTokenHash =
-      hashRefreshToken(refreshToken);
+    const refreshTokenHash = hashRefreshToken(refreshToken);
 
     // Create session
     await Session.create({
@@ -215,63 +183,45 @@ export async function POST(req: Request) {
       refreshTokenHash,
       userAgent,
       ipAddress,
-      expiresAt: new Date(
-        Date.now() +
-          30 * 24 * 60 * 60 * 1000
-      ),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
     // Create response
     const response = NextResponse.json({
-      message:
-        "شماره موبایل با موفقیت تایید شد",
+      message: 'شماره موبایل با موفقیت تایید شد',
 
       userId: user._id,
 
-      isVerifiedPhoneNumber:
-        user.isVerifiedPhoneNumber,
+      isVerifiedPhoneNumber: user.isVerifiedPhoneNumber,
 
       isActive: user.isActive,
     });
 
     // Access token cookie
-    response.cookies.set(
-      "accessToken",
-      accessToken,
-      {
-        httpOnly: true,
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
 
-        secure:
-          process.env.NODE_ENV ===
-          "production",
+      secure: process.env.NODE_ENV === 'production',
 
-        sameSite: "lax",
+      sameSite: 'lax',
 
-        path: "/",
+      path: '/',
 
-        maxAge: 15 * 60,
-      }
-    );
+      maxAge: 15 * 60,
+    });
 
     // Refresh token cookie
-    response.cookies.set(
-      "refreshToken",
-      refreshToken,
-      {
-        httpOnly: true,
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
 
-        secure:
-          process.env.NODE_ENV ===
-          "production",
+      secure: process.env.NODE_ENV === 'production',
 
-        sameSite: "lax",
+      sameSite: 'lax',
 
-        path: "/",
+      path: '/',
 
-        maxAge:
-          30 * 24 * 60 * 60,
-      }
-    );
+      maxAge: 30 * 24 * 60 * 60,
+    });
 
     return response;
   } catch (error) {
@@ -279,8 +229,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message:
-          "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

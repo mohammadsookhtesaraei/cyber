@@ -1,75 +1,48 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-import connectDb from "@/utils/connectDb";
-import Session from "@/model/Session";
-import User from "@/model/User";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 import {
-  verifyRefreshToken,
   generateAccessToken,
   generateRefreshToken,
   hashRefreshToken,
-} from "@/utils/auth";
+  verifyRefreshToken,
+} from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
+
+import Session from '@/model/Session';
+import User from '@/model/User';
 
 export async function POST(req: Request) {
   try {
-    // Connect to database
     await connectDb();
 
-    // Get refresh token from HttpOnly cookie
     const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    const refreshToken =
-      cookieStore.get("refreshToken")?.value;
-
-    // Check refresh token
     if (!refreshToken) {
       return NextResponse.json(
-        {
-          message: "Refresh token is required",
-        },
-        {
-          status: 401,
-        }
+        { message: 'Refresh token is required' },
+        { status: 401 }
       );
     }
 
-    // Verify refresh token
-    const payload =
-      verifyRefreshToken(refreshToken);
+    const payload = verifyRefreshToken(refreshToken);
 
     if (!payload) {
       return NextResponse.json(
-        {
-          message:
-            "Refresh token is invalid or expired",
-        },
-        {
-          status: 401,
-        }
+        { message: 'Refresh token is invalid or expired' },
+        { status: 401 }
       );
     }
 
-    // Find user
     const user = await User.findById(payload.userId);
 
     if (!user) {
-      return NextResponse.json(
-        {
-          message: "User not found",
-        },
-        {
-          status: 404,
-        }
-      );
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Hash current refresh token
-    const refreshTokenHash =
-      hashRefreshToken(refreshToken);
+    const refreshTokenHash = hashRefreshToken(refreshToken);
 
-    // Find current session
     const session = await Session.findOne({
       userId: user._id,
       refreshTokenHash,
@@ -77,123 +50,74 @@ export async function POST(req: Request) {
 
     if (!session) {
       return NextResponse.json(
-        {
-          message: "Session not found",
-        },
-        {
-          status: 401,
-        }
+        { message: 'Session not found' },
+        { status: 401 }
       );
     }
 
-    // Check session expiration
     if (new Date() > session.expiresAt) {
-      await Session.deleteOne({
-        _id: session._id,
-      });
+      await Session.deleteOne({ _id: session._id });
 
-      return NextResponse.json(
-        {
-          message: "Session expired",
-        },
-        {
-          status: 401,
-        }
-      );
+      return NextResponse.json({ message: 'Session expired' }, { status: 401 });
     }
 
-    // Get device information
     const userAgent =
-      req.headers.get("user-agent") ||
-      session.userAgent ||
-      undefined;
+      req.headers.get('user-agent') || session.userAgent || undefined;
 
-    const forwardedFor =
-      req.headers.get("x-forwarded-for");
+    const forwardedFor = req.headers.get('x-forwarded-for');
 
     const ipAddress =
-      forwardedFor?.split(",")[0]?.trim() ||
-      session.ipAddress ||
-      undefined;
+      forwardedFor?.split(',')[0]?.trim() || session.ipAddress || undefined;
 
-    // Generate new access token
-    const newAccessToken =
-      generateAccessToken(
-        user._id.toString(),
-        user.role
-      );
+    const newAccessToken = generateAccessToken(user._id.toString(), user.role);
+    const newRefreshToken = generateRefreshToken(
+      user._id.toString(),
+      user.role
+    );
+    const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
 
-    // Generate new refresh token
-    const newRefreshToken =
-      generateRefreshToken(
-        user._id.toString(),
-        user.role
-      );
+    // سشن قدیمی رو فوراً حذف نکن؛ ۳۰ ثانیه مهلت برای درخواست‌های همزمان
+    await Session.updateOne(
+      { _id: session._id },
+      { expiresAt: new Date(Date.now() + 30 * 1000) }
+    );
 
-    // Hash new refresh token
-    const newRefreshTokenHash =
-      hashRefreshToken(newRefreshToken);
-
-    // Delete old session
-    await Session.deleteOne({
-      _id: session._id,
-    });
-
-    // Create new rotated session
+    // سشن جدید (rotation)
     await Session.create({
       userId: user._id,
       refreshTokenHash: newRefreshTokenHash,
       userAgent,
       ipAddress,
-      expiresAt: new Date(
-        Date.now() + 30 * 24 * 60 * 60 * 1000
-      ),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
-    // Create response
     const response = NextResponse.json({
-      message: "Tokens refreshed successfully",
+      message: 'Tokens refreshed successfully',
     });
 
-    // Set new access token cookie
-    response.cookies.set(
-      "accessToken",
-      newAccessToken,
-      {
-        httpOnly: true,
-        secure:
-          process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60,
-      }
-    );
+    response.cookies.set('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 15 * 60,
+    });
 
-    // Set new refresh token cookie
-    response.cookies.set(
-      "refreshToken",
-      newRefreshToken,
-      {
-        httpOnly: true,
-        secure:
-          process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 30 * 24 * 60 * 60,
-      }
-    );
+    response.cookies.set('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
+    });
 
     return response;
   } catch (error) {
     console.log(error);
 
     return NextResponse.json(
-      {
-        message: "Something went wrong",
-      },
-      {
-        status: 500,
-      }
+      { message: 'Something went wrong' },
+      { status: 500 }
     );
   }
 }

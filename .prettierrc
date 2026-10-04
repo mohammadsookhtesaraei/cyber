@@ -19,6 +19,7 @@
     "^zod(/.*)?$",
     "^clsx(/.*)?$",
     "^framer-motion(/.*)?$",
+    "^lucide-react(/.*)?$",
     "^axios(/.*)?$",
     "<THIRD_PARTY_MODULES>",
     "^@/components(/.*)?$",

@@ -17,7 +17,7 @@ app.interceptors.response.use(
       orginalConfig._retry = true;
 
       try {
-        const { data } = await axios.get(`${API_URL}/auth/refresh-token`, {
+        const { data } = await axios.post(`${API_URL}/auth/refresh-token`, {
           withCredentials: true,
         });
         if (data) return app(orginalConfig);

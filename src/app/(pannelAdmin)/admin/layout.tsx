@@ -8,15 +8,17 @@ import clsx from 'clsx';
 
 import { Menu } from 'lucide-react';
 
+import Sidebar from './components/Sidebar/Sidebar';
+
 import ThemeToggle from '@/layout/components/Header/components/ThemeToggle';
 
-import Sidebar from '@/app/(pannelAdmin)/admin/components/Sidebar/Sidebar';
 import { adminRoutes } from '@/constant/data';
 
 type AdminProps = PropsWithChildren;
 
 const AdminLayout = ({ children }: AdminProps) => {
   const pathname = usePathname();
+
   const [isOpenSideBar, setIsOpenSideBar] = useState(false);
 
   const currentRoute = adminRoutes.find((route) => {
@@ -35,17 +37,19 @@ const AdminLayout = ({ children }: AdminProps) => {
 
   return (
     <div className="grid grid-cols-12 grid-rows-[80px_1fr]">
+      {/* sidebar */}
       <Sidebar
         isOpen={isOpenSideBar}
         setIsOpenSideBar={setIsOpenSideBar}
         style={clsx(
-          'fixed top-0 right-0 z-50  w-64 ',
+          'fixed top-0 right-0 z-50 h-screen  w-64 ',
 
           ' md:col-span-2 md:row-span-2',
-          ' md:w-auto'
+          ' md:w-auto md:static!'
         )}
       />
 
+      {/* header */}
       <div className="col-span-12 flex items-center justify-between p-4 md:col-span-10">
         <div className="flex gap-x-2">
           <button
@@ -61,6 +65,7 @@ const AdminLayout = ({ children }: AdminProps) => {
         <ThemeToggle />
       </div>
 
+      {/* content */}
       <div className="col-span-12 md:col-span-10">{children}</div>
     </div>
   );

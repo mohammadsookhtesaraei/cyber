@@ -47,7 +47,7 @@ const Accordion = ({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className={clsx(
-          'group flex w-full items-center justify-between rounded-xl px-4 py-3 text-right transition-all duration-200',
+          'group flex w-full items-center justify-between rounded-xl px-4 py-1 text-right transition-all duration-200',
           isOpen ? 'bg-white/10' : 'bg-transparent',
           'hover:bg-white/10'
         )}
@@ -55,7 +55,7 @@ const Accordion = ({
         <div className="flex items-center gap-3">
           <span
             className={clsx(
-              'flex size-9 items-center justify-center rounded-lg bg-white/5 text-xl transition-all duration-200',
+              'flex size-9 items-center justify-center rounded-lg bg-white/5 text-lg transition-all duration-200',
               'group-hover:bg-white/10',
               isOpen && 'bg-white/10'
             )}

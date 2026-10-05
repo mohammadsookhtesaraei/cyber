@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 
 import { X } from 'lucide-react';
 
-import Accordion from '@/app/(pannelAdmin)/admin/components/Sidebar/Accordion/Accordion';
+import Accordion from './Accordion/Accordion';
+
 import { adminRoutes } from '@/constant/data';
 
 type SidebarProps = {
@@ -37,11 +38,11 @@ const Sidebar = ({
       transition={{
         duration: 0.4,
       }}
-      className={`${style} h-dvh overflow-hidden bg-linear-180 from-[#2d2468] to-[#1b1640] md:static! md:h-auto md:transform-none! md:opacity-100!`}
+      className={`${style} h-dvh overflow-hidden bg-linear-180 from-[#2d2468] to-[#1b1640] md:h-auto md:transform-none! md:opacity-100!`}
     >
+      {/* header */}
       <div className="flex items-center justify-between p-4">
         <span className="text-white">پنل مدیریت</span>
-
         <button
           className="md:hidden"
           type="button"
@@ -52,16 +53,19 @@ const Sidebar = ({
         </button>
       </div>
 
-      <div className="sidebar-scrollbar h-[calc(100dvh-73px)] overflow-y-auto md:h-auto">
-        {adminRoutes.map((route) => (
-          <Accordion
-            key={route.href}
-            title={route.title}
-            icon={route.icon}
-            items={route.children ?? []}
-            setIsOpenSideBar={setIsOpenSideBar}
-          />
-        ))}
+      {/* accordion-box -with-map */}
+      <div className="sidebar-scrollbar h-[calc(100dvh-80px)] overflow-y-auto">
+        {adminRoutes.map((route) => {
+          return (
+            <Accordion
+              key={route.href}
+              title={route.title}
+              icon={route.icon}
+              items={route.children ?? []}
+              setIsOpenSideBar={setIsOpenSideBar}
+            />
+          );
+        })}
       </div>
     </motion.aside>
   );

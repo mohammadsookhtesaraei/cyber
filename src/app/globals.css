@@ -78,6 +78,16 @@ input:-webkit-autofill:active {
   }
 }
 
+@layer components {
+  .table__th {
+    @apply border-b-2 border-b-gray-500 p-3 pr-8 pb-3 text-center font-medium;
+  }
+
+  .table__td {
+    @apply border-b border-b-gray-300 p-3 pr-8 pb-3 text-right;
+  }
+}
+
 @utility wrapper {
   @apply mx-auto max-w-7xl px-4 md:px-6 lg:px-8;
 }

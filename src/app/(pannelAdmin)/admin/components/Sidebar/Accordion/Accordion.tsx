@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { ReactElement, ReactNode, useState } from 'react';
 
@@ -20,6 +21,7 @@ type AccordionProps = {
 };
 
 const Accordion = ({ title, icon, items }: AccordionProps): ReactElement => {
+  const pathName = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -80,30 +82,35 @@ const Accordion = ({ title, icon, items }: AccordionProps): ReactElement => {
             className="overflow-hidden"
           >
             <ul className="relative mt-1 mr-5 border-r border-white/10 py-1 pr-4">
-              {items.map((item) => (
-                <li key={item.href} className="relative">
-                  <Link
-                    href={item.href}
-                    className={clsx(
-                      'group/item relative flex items-center rounded-lg px-3 py-2.5',
-                      'text-sm text-gray-400 transition-all duration-200',
-                      'hover:bg-white/5 hover:text-white'
-                    )}
-                  >
-                    <span
+              {items.map((item) => {
+                const isActive = pathName === item.href;
+                return (
+                  <li key={item.href} className="relative">
+                    <Link
+                      href={item.href}
                       className={clsx(
-                        'absolute -right-5.25 h-2 w-2 rounded-full bg-gray-600 transition-all duration-200',
-                        'group-hover/item:bg-white',
-                        'group-hover/item:shadow-[0_0_8px_rgba(255,255,255,0.7)]'
+                        'group/item relative flex items-center rounded-lg px-3 py-2.5',
+                        'text-sm text-gray-400 transition-all duration-200',
+                        'hover:text-white',
+                        isActive && 'bg-white/5 text-white'
                       )}
-                    />
+                    >
+                      <span
+                        className={clsx(
+                          'absolute -right-5.25 h-2 w-2 rounded-full bg-gray-600 transition-all duration-200',
+                          'group-hover/item:bg-white',
+                          'group-hover/item:shadow-[0_0_8px_rgba(255,255,255,0.7)]',
+                          isActive && 'bg-white'
+                        )}
+                      />
 
-                    <span className="transition-transform duration-200 group-hover/item:-translate-x-1">
-                      {item.title}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                      <span className="transition-transform duration-200 group-hover/item:-translate-x-1">
+                        {item.title}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </motion.div>
         )}

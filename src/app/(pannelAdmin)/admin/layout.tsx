@@ -17,6 +17,7 @@ type AdminProps = PropsWithChildren;
 
 const AdminLayout = ({ children }: AdminProps) => {
   const pathname = usePathname();
+  const [isOpenSideBar, setIsOpenSideBar] = useState(false);
 
   const currentRoute = adminRoutes.find((route) => {
     if (route.href === '/admin') {
@@ -32,18 +33,16 @@ const AdminLayout = ({ children }: AdminProps) => {
 
   const title = currentChild?.title ?? currentRoute?.title ?? 'پنل مدیریت';
 
-  const [isOpenSideBar, setIsOpenSideBar] = useState(false);
-
   return (
-    <div className="grid h-screen grid-cols-12 grid-rows-[80px_1fr]">
+    <div className="grid grid-cols-12 grid-rows-[80px_1fr]">
       <Sidebar
         isOpen={isOpenSideBar}
         setIsOpenSideBar={setIsOpenSideBar}
         style={clsx(
-          'fixed top-0 right-0 z-50 h-screen w-64 ',
+          'fixed top-0 right-0 z-50  w-64 ',
 
-          'md:static md:col-span-2 md:row-span-2',
-          'md:h-auto md:w-auto'
+          ' md:col-span-2 md:row-span-2',
+          ' md:w-auto'
         )}
       />
 

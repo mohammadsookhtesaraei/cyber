@@ -2,17 +2,16 @@
 
 import Link from 'next/link';
 
+import CategoryTable from './components/CategoryTable';
 import { RotatingLines } from 'react-loader-spinner';
 
 import { useCategoriesByAdmin } from '@/hook/useCategories';
-
-import CategoryTable from '@/app/(pannelAdmin)/admin/categories/components/CategoryTable';
 
 const Categories = () => {
   const { data, isPending } = useCategoriesByAdmin();
 
   const { categories } = data || {};
-  console.log(categories);
+
   if (isPending) {
     return (
       <div className="flex min-h-50 items-center justify-center">

@@ -10,13 +10,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import axios from 'axios';
 
+import FormCategory from '../components/FormCategory';
 import toast from 'react-hot-toast';
 
 import { useCreateCategory } from '@/hook/useCategories';
 
 import { CategoryFormValues, categorySchema } from '@/schemas/category-schema';
-
-import FormCategory from '@/app/(pannelAdmin)/admin/categories/components/FormCategory';
 
 const CategoriesAddPage = (): ReactElement => {
   const router = useRouter();

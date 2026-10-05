@@ -37,10 +37,11 @@ const Sidebar = ({
       transition={{
         duration: 0.4,
       }}
-      className={`${style} sidebar-scrollbar overflow-y-auto bg-linear-180 from-[#2d2468] to-[#1b1640] md:static! md:transform-none! md:opacity-100!`}
+      className={`${style} h-dvh overflow-hidden bg-linear-180 from-[#2d2468] to-[#1b1640] md:static! md:h-auto md:transform-none! md:opacity-100!`}
     >
       <div className="flex items-center justify-between p-4">
         <span className="text-white">پنل مدیریت</span>
+
         <button
           className="md:hidden"
           type="button"
@@ -51,16 +52,17 @@ const Sidebar = ({
         </button>
       </div>
 
-      {adminRoutes.map((route) => {
-        return (
+      <div className="sidebar-scrollbar h-[calc(100dvh-73px)] overflow-y-auto md:h-auto">
+        {adminRoutes.map((route) => (
           <Accordion
             key={route.href}
             title={route.title}
             icon={route.icon}
             items={route.children ?? []}
+            setIsOpenSideBar={setIsOpenSideBar}
           />
-        );
-      })}
+        ))}
+      </div>
     </motion.aside>
   );
 };

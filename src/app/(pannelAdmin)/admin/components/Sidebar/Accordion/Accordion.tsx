@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { ReactElement, ReactNode, useState } from 'react';
+import {
+  Dispatch,
+  ReactElement,
+  ReactNode,
+  SetStateAction,
+  useState,
+} from 'react';
 
 import clsx from 'clsx';
 
@@ -18,14 +24,25 @@ type AccordionProps = {
   title: string;
   icon: ReactNode;
   items: AccordionItems[];
+  setIsOpenSideBar: Dispatch<SetStateAction<boolean>>;
 };
 
-const Accordion = ({ title, icon, items }: AccordionProps): ReactElement => {
+const Accordion = ({
+  title,
+  icon,
+  items,
+  setIsOpenSideBar,
+}: AccordionProps): ReactElement => {
   const pathName = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleAccordionButtonClick = (): void => {
+    setIsOpen(false);
+    setIsOpenSideBar(false);
+  };
+
   return (
-    <div className="mb-2 px-2">
+    <div className="px-2">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -86,28 +103,30 @@ const Accordion = ({ title, icon, items }: AccordionProps): ReactElement => {
                 const isActive = pathName === item.href;
                 return (
                   <li key={item.href} className="relative">
-                    <Link
-                      href={item.href}
-                      className={clsx(
-                        'group/item relative flex items-center rounded-lg px-3 py-2.5',
-                        'text-sm text-gray-400 transition-all duration-200',
-                        'hover:text-white',
-                        isActive && 'bg-white/5 text-white'
-                      )}
-                    >
-                      <span
+                    <button className="" onClick={handleAccordionButtonClick}>
+                      <Link
+                        href={item.href}
                         className={clsx(
-                          'absolute -right-5.25 h-2 w-2 rounded-full bg-gray-600 transition-all duration-200',
-                          'group-hover/item:bg-white',
-                          'group-hover/item:shadow-[0_0_8px_rgba(255,255,255,0.7)]',
-                          isActive && 'bg-white'
+                          'group/item relative flex items-center rounded-lg px-3 py-2.5',
+                          'text-sm text-gray-400 transition-all duration-200',
+                          'hover:text-white',
+                          isActive && 'bg-white/5 text-white'
                         )}
-                      />
+                      >
+                        <span
+                          className={clsx(
+                            'absolute -right-5.25 h-2 w-2 rounded-full bg-gray-600 transition-all duration-200',
+                            'group-hover/item:bg-white',
+                            'group-hover/item:shadow-[0_0_8px_rgba(255,255,255,0.7)]',
+                            isActive && 'bg-white'
+                          )}
+                        />
 
-                      <span className="transition-transform duration-200 group-hover/item:-translate-x-1">
-                        {item.title}
-                      </span>
-                    </Link>
+                        <span className="transition-transform duration-200 group-hover/item:-translate-x-1">
+                          {item.title}
+                        </span>
+                      </Link>
+                    </button>
                   </li>
                 );
               })}

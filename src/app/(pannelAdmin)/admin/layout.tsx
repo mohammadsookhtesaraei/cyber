@@ -1,20 +1,70 @@
-import { PropsWithChildren } from 'react';
+'use client';
+
+import { usePathname } from 'next/navigation';
+
+import { PropsWithChildren, useState } from 'react';
+
+import clsx from 'clsx';
+
+import { Menu } from 'lucide-react';
 
 import ThemeToggle from '@/layout/components/Header/components/ThemeToggle';
 
 import Sidebar from '@/app/(pannelAdmin)/admin/components/Sidebar/Sidebar';
+import { adminRoutes } from '@/constant/data';
 
 type AdminProps = PropsWithChildren;
 
 const AdminLayout = ({ children }: AdminProps) => {
+  const pathname = usePathname();
+
+  const currentRoute = adminRoutes.find((route) => {
+    if (route.href === '/admin') {
+      return pathname === '/admin';
+    }
+
+    return pathname === route.href || pathname.startsWith(`${route.href}/`);
+  });
+
+  const currentChild = adminRoutes
+    .flatMap((route) => route.children ?? [])
+    .find((child) => pathname === child.href);
+
+  const title = currentChild?.title ?? currentRoute?.title ?? 'پنل مدیریت';
+
+  const [isOpenSideBar, setIsOpenSideBar] = useState(false);
+
   return (
-    <div className="relative grid grid-cols-12 grid-rows-[50px_minmax(500px,1fr)]">
-      <Sidebar style="fixed bg-blue-400" />
-      <div className="col-span-10 bg-red-400">
+    <div className="grid h-screen grid-cols-12 grid-rows-[80px_1fr]">
+      <Sidebar
+        isOpen={isOpenSideBar}
+        setIsOpenSideBar={setIsOpenSideBar}
+        style={clsx(
+          'fixed top-0 right-0 z-50 h-screen w-64 ',
+
+          'md:static md:col-span-2 md:row-span-2',
+          'md:h-auto md:w-auto'
+        )}
+      />
+
+      <div className="col-span-12 flex items-center justify-between p-4 md:col-span-10">
+        <div className="flex gap-x-2">
+          <button
+            type="button"
+            className="md:hidden"
+            onClick={() => setIsOpenSideBar((prev) => !prev)}
+            aria-label="باز و بسته کردن سایدبار"
+          >
+            <Menu />
+          </button>
+          <h2>{title}</h2>
+        </div>
         <ThemeToggle />
       </div>
-      <div className="col-span-10 row-span-2 bg-green-500">{children}</div>
+
+      <div className="col-span-12 md:col-span-10">{children}</div>
     </div>
   );
 };
+
 export default AdminLayout;

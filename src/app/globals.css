@@ -53,6 +53,31 @@ input:-webkit-autofill:active {
   --color-danger: var(--danger);
 }
 
+@layer utilities {
+  .sidebar-scrollbar {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(107 114 128 / 0.5) transparent;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgb(107 114 128 / 0.5);
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgb(156 163 175 / 0.7);
+  }
+}
+
 @utility wrapper {
   @apply mx-auto max-w-7xl px-4 md:px-6 lg:px-8;
 }

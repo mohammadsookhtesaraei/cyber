@@ -16,7 +16,6 @@ import axios from 'axios';
 import CheckOtpForm from './components/(forms)/CheckOtpForm/CheckOtpForm';
 import OtpForm from './components/(forms)/OtpForm/OtpForm';
 import ActionsButton from './components/ActionsButton/ActionsButton';
-import Logo from './components/Logo/Logo';
 import toast from 'react-hot-toast';
 
 import { sendOtpFn, verifyOtpFn } from '@/services/authServices';
@@ -183,7 +182,6 @@ const AuthPage = (): ReactElement => {
 
   return (
     <div className="bg-bg-white flex min-h-screen flex-col items-center py-24 lg:py-32">
-      <Logo />
       <div className="border-border bg-bg w-full max-w-100 rounded-[20px] border p-6">
         <ActionsButton step={step} />
 

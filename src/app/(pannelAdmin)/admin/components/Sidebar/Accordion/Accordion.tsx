@@ -1,9 +1,8 @@
-'use client';
-
 import Link from 'next/link';
 
-import { ReactElement, ReactNode } from 'react';
-import { useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
+
+import clsx from 'clsx';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -22,38 +21,87 @@ type AccordionProps = {
 
 const Accordion = ({ title, icon, items }: AccordionProps): ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="">
+    <div className="mb-2 px-2">
       <button
-        className="flex items-center justify-between gap-x-4"
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
+        className={clsx(
+          'group flex w-full items-center justify-between rounded-xl px-4 py-3 text-right transition-all duration-200',
+          isOpen ? 'bg-white/10' : 'bg-transparent',
+          'hover:bg-white/10'
+        )}
       >
-        <span className="flex gap-x-2">
-          {icon}
-          {title}
-        </span>
+        <div className="flex items-center gap-3">
+          <span
+            className={clsx(
+              'flex size-9 items-center justify-center rounded-lg bg-white/5 text-xl transition-all duration-200',
+              'group-hover:bg-white/10',
+              isOpen && 'bg-white/10'
+            )}
+          >
+            {icon}
+          </span>
+
+          <span
+            className={clsx(
+              'text-sm font-medium transition-colors',
+              isOpen ? 'text-white' : 'text-gray-300',
+              'group-hover:text-white'
+            )}
+          >
+            {title}
+          </span>
+        </div>
+
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="flex items-center justify-between"
+          className="flex size-7 items-center justify-center rounded-md"
         >
-          <ChevronDown />
+          <ChevronDown
+            size={18}
+            className="text-gray-400 transition-colors group-hover:text-white"
+          />
         </motion.div>
       </button>
+
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            transition={{
+              duration: 0.25,
+              ease: 'easeInOut',
+            }}
             className="overflow-hidden"
           >
-            <ul>
+            <ul className="relative mt-1 mr-5 border-r border-white/10 py-1 pr-4">
               {items.map((item) => (
-                <li key={item.title}>
-                  <Link href={item.href}>{item.title}</Link>
+                <li key={item.href} className="relative">
+                  <Link
+                    href={item.href}
+                    className={clsx(
+                      'group/item relative flex items-center rounded-lg px-3 py-2.5',
+                      'text-sm text-gray-400 transition-all duration-200',
+                      'hover:bg-white/5 hover:text-white'
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        'absolute -right-5.25 h-2 w-2 rounded-full bg-gray-600 transition-all duration-200',
+                        'group-hover/item:bg-white',
+                        'group-hover/item:shadow-[0_0_8px_rgba(255,255,255,0.7)]'
+                      )}
+                    />
+
+                    <span className="transition-transform duration-200 group-hover/item:-translate-x-1">
+                      {item.title}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>

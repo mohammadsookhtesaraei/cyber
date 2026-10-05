@@ -31,7 +31,7 @@ const InputForm = ({
         id={id}
         type="text"
         {...rest}
-        autoComplete="none"
+        autoComplete="off"
       />
       <span
         className={clsx(

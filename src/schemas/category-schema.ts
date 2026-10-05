@@ -19,9 +19,12 @@ export const categorySchema = z.object({
     .min(2, 'عنوان انگلیسی حداقل باید ۲ کاراکتر باشد')
     .max(100, 'عنوان انگلیسی حداکثر باید ۱۰۰ کاراکتر باشد'),
 
-  type: z.enum(['product', 'comment', 'post', 'ticket'], {
-    error: 'نوع دسته‌بندی را انتخاب کنید',
-  }),
+  type: z
+    .string()
+    .refine(
+      (value) => ['product', 'comment', 'post', 'ticket'].includes(value),
+      'نوع دسته‌بندی را انتخاب کنید'
+    ),
 });
 
 export type CategoryFormValues = z.infer<typeof categorySchema>;

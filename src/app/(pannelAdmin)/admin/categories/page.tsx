@@ -17,10 +17,10 @@ const Categories = () => {
       <div className="flex min-h-50 items-center justify-center">
         <RotatingLines
           visible={true}
-          height="96"
-          width="96"
-          color="grey"
-          strokeWidth="5"
+          height="30"
+          width="30"
+          color="green"
+          strokeWidth="3"
           animationDuration="0.75"
           ariaLabel="rotating-lines-loading"
           wrapperStyle={{}}
@@ -32,7 +32,7 @@ const Categories = () => {
   return (
     <div className="px-4">
       <div className="my-2 flex w-fit items-center rounded-md bg-linear-180 from-[#2d2468] to-[#1b1640] p-2 text-white">
-        <Link href="/admin/categories/add">اضافه کردن محصول</Link>
+        <Link href="/admin/categories/add">اضافه کردن دسته بندی جدید</Link>
       </div>
       <CategoryTable categories={categories} />
     </div>

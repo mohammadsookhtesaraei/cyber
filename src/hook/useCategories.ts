@@ -20,3 +20,8 @@ export const useRemoveCategory = () => {
 export const useCreateCategory = () => {
   return useMutation({ mutationFn: createCategoryFn });
 };
+
+
+export const useCategoryById=(id:string)=>{
+  return useMutation
+}

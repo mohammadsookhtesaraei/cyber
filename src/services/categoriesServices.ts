@@ -22,3 +22,8 @@ export const createCategoryFn = async (category: TCategory) => {
   const { data } = await app.post('/admin/categories', category);
   return data;
 };
+
+export const getCategoryById = async (id: string) => {
+  const { data } = await app.post(`/admin/categories/${id}`);
+  return data;
+};

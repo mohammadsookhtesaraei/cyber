@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getAllProducts } from '@/services/productServices';
+import { getAllProducts, removeProduct } from '@/services/productServices';
 
 // get all products hook
 
@@ -10,5 +10,13 @@ export const useGetAllProducts = () => {
     queryFn: getAllProducts,
     retry: false,
     refetchOnWindowFocus: true,
+  });
+};
+
+// remove single product
+
+export const useRemoveProduct = () => {
+  return useMutation({
+    mutationFn: removeProduct,
   });
 };

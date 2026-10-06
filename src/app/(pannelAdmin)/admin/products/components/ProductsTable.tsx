@@ -8,6 +8,8 @@ import axios from 'axios';
 
 import toast from 'react-hot-toast';
 
+import { useRemoveProduct } from '@/hook/useProducts';
+
 import { IProduct } from '@/types/product-interface';
 
 import {
@@ -17,15 +19,14 @@ import {
 
 import { productListTableTHeads } from '@/constant/tableHeads';
 
-// import { useRemoveProduct } from '@/hook/useProducts';
 type ProductsTableProps = { products: IProduct[] };
 const ProductsTable = ({ products }: ProductsTableProps) => {
   const queryClient = useQueryClient();
-  //   const { mutateAsync: removeProduct, isPending } = useRemoveProduct();
+  const { mutateAsync: removeProduct, isPending } = useRemoveProduct();
   const removeProductHandler = async (id: string) => {
     try {
-      //   const { message } = await removeProduct(id);
-      //   toast.success(message);
+      const { message } = await removeProduct(id);
+      toast.success(message);
       await queryClient.invalidateQueries({ queryKey: ['get-products'] });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -87,7 +88,7 @@ const ProductsTable = ({ products }: ProductsTableProps) => {
                   </Link>
                   <button
                     type="button"
-                    // disabled={isPending}
+                    disabled={isPending}
                     onClick={() => removeProductHandler(item._id.toString())}
                     className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-rose-500 transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
                   >

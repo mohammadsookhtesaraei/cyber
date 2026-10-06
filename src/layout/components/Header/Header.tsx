@@ -12,6 +12,7 @@ const Header = (): ReactElement => {
 
       <Link href="/profile">پروفایل کاربری</Link>
       <Link href="/check-profile">چک پروفایل</Link>
+      <Link href="/admin">ادمین</Link>
 
       <ThemeToggle />
     </header>

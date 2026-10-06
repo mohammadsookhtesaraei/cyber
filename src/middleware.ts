@@ -61,11 +61,11 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // اگر کاربر نبود، کوکی‌های خراب را پاک می‌کنیم
-  if (!user) {
-    response.cookies.delete('accessToken');
-    response.cookies.delete('refreshToken');
-  }
+  // // اگر کاربر نبود، کوکی‌های خراب را پاک می‌کنیم
+  // if (!user) {
+  //   response.cookies.delete('accessToken');
+  //   response.cookies.delete('refreshToken');
+  // }
 
   return response;
 }

@@ -4,12 +4,15 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { ReactElement, useEffect } from 'react';
 
+import { useQueries, useQueryClient } from '@tanstack/react-query';
+
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import axios from 'axios';
 
+import FormCategory from '../../components/FormCategory';
 import toast from 'react-hot-toast';
 import { RotatingLines } from 'react-loader-spinner';
 
@@ -17,15 +20,23 @@ import { useGetCategoryById, useUpdateCategory } from '@/hook/useCategories';
 
 import { CategoryFormValues, categorySchema } from '@/schemas/category-schema';
 
-import FormCategory from '@/app/(pannelAdmin)/admin/categories/components/FormCategory';
-
 const EditCategory = (): ReactElement => {
   const router = useRouter();
   const { edit } = useParams<{ edit: string }>();
 
+  // اینجا وقتی دیتارو فچ میکنیم اول اندیفایند باید لئدینگ رو رندر کنیم بعد فرم
+  // اگه لودر رو نشون ندیم درمونت اولیه دیتا نداریم و یوز افکت مقادیر خالی ست میکنه توی فیلدای فرم
+  // و مونت اولیه دیگه ما فیلدای فرم ما خالیه  ما اینو نمیخوایم
+  // میخوایم در مونت اولیه دیتا در فرم نشون داده بشه
+  // پس لودینگ گرفتن اطلاعات رو رندر میکنیم - اطلاعات میاد و یوز افکت اونو داخل فرم میذاره در مونت اولیه
+
+  // لودینگ ابدیتنک هم که برای ارسال داده هست میره برای باتن فرم
+
   const { data, isPending: isGettingCategory } = useGetCategoryById(edit);
 
   const { mutateAsync, isPending: isUpdating } = useUpdateCategory();
+
+  const querClient = useQueryClient();
 
   const {
     register,
@@ -62,6 +73,14 @@ const EditCategory = (): ReactElement => {
 
       toast.success(message);
       reset();
+
+      querClient.invalidateQueries({
+        queryKey: ['get-categoryAdmin'],
+      });
+
+      querClient.invalidateQueries({
+        queryKey: ['get-category', edit],
+      });
 
       router.push('/admin/categories');
     } catch (error) {

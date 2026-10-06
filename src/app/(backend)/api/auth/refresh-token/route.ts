@@ -17,30 +17,49 @@ export async function POST(req: Request) {
     await connectDb();
 
     const cookieStore = await cookies();
+
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
     if (!refreshToken) {
       return NextResponse.json(
-        { message: 'Refresh token is required' },
-        { status: 401 }
+        {
+          message: 'Refresh token is required',
+        },
+        {
+          status: 401,
+        }
       );
     }
 
+    // بررسی JWT رفرش توکن
     const payload = verifyRefreshToken(refreshToken);
 
     if (!payload) {
       return NextResponse.json(
-        { message: 'Refresh token is invalid or expired' },
-        { status: 401 }
+        {
+          message: 'Refresh token is invalid or expired',
+        },
+        {
+          status: 401,
+        }
       );
     }
 
+    // پیدا کردن کاربر
     const user = await User.findById(payload.userId);
 
     if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        {
+          message: 'User not found',
+        },
+        {
+          status: 404,
+        }
+      );
     }
 
+    // پیدا کردن Session مربوط به Refresh Token
     const refreshTokenHash = hashRefreshToken(refreshToken);
 
     const session = await Session.findOne({
@@ -50,15 +69,29 @@ export async function POST(req: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { message: 'Session not found' },
-        { status: 401 }
+        {
+          message: 'Session not found',
+        },
+        {
+          status: 401,
+        }
       );
     }
 
+    // بررسی انقضای Session
     if (new Date() > session.expiresAt) {
-      await Session.deleteOne({ _id: session._id });
+      await Session.deleteOne({
+        _id: session._id,
+      });
 
-      return NextResponse.json({ message: 'Session expired' }, { status: 401 });
+      return NextResponse.json(
+        {
+          message: 'Session expired',
+        },
+        {
+          status: 401,
+        }
+      );
     }
 
     const userAgent =
@@ -69,20 +102,32 @@ export async function POST(req: Request) {
     const ipAddress =
       forwardedFor?.split(',')[0]?.trim() || session.ipAddress || undefined;
 
+    // ساخت Access Token جدید
     const newAccessToken = generateAccessToken(user._id.toString(), user.role);
+
+    // ساخت Refresh Token جدید
     const newRefreshToken = generateRefreshToken(
       user._id.toString(),
       user.role
     );
+
     const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
 
-    // سشن قدیمی رو فوراً حذف نکن؛ ۳۰ ثانیه مهلت برای درخواست‌های همزمان
+    /*
+     * Session قبلی را فعلاً نگه می‌داریم
+     * تا درخواست‌های همزمان بتوانند
+     * در یک بازه کوتاه از آن استفاده کنند.
+     */
     await Session.updateOne(
-      { _id: session._id },
-      { expiresAt: new Date(Date.now() + 30 * 1000) }
+      {
+        _id: session._id,
+      },
+      {
+        expiresAt: new Date(Date.now() + 30 * 1000),
+      }
     );
 
-    // سشن جدید (rotation)
+    // Session جدید
     await Session.create({
       userId: user._id,
       refreshTokenHash: newRefreshTokenHash,
@@ -95,6 +140,7 @@ export async function POST(req: Request) {
       message: 'Tokens refreshed successfully',
     });
 
+    // Access Token جدید
     response.cookies.set('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -103,6 +149,7 @@ export async function POST(req: Request) {
       maxAge: 15 * 60,
     });
 
+    // Refresh Token جدید
     response.cookies.set('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -113,11 +160,15 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.log(error);
+    console.error('REFRESH TOKEN ERROR:', error);
 
     return NextResponse.json(
-      { message: 'Something went wrong' },
-      { status: 500 }
+      {
+        message: 'Something went wrong',
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

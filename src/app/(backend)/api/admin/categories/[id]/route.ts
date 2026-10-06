@@ -79,8 +79,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     const { id } = await params;
 
-    console.log('PATCH ID:', id);
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         {
@@ -91,8 +89,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     const body = await request.json();
-
-    console.log('PATCH BODY:', body);
 
     const { title, englishTitle, description, type, parentId, icon } = body;
 
@@ -197,27 +193,9 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       }
     }
 
-    console.log('BEFORE SAVE:', {
-      id: category._id.toString(),
-      title: category.title,
-      englishTitle: category.englishTitle,
-    });
-
     await category.save();
 
-    console.log('AFTER SAVE:', {
-      id: category._id.toString(),
-      title: category.title,
-      englishTitle: category.englishTitle,
-    });
-
     const updatedCategory = await Category.findById(id);
-
-    console.log('DB AFTER SAVE:', {
-      id: updatedCategory?._id.toString(),
-      title: updatedCategory?.title,
-      englishTitle: updatedCategory?.englishTitle,
-    });
 
     return NextResponse.json(
       {
@@ -227,8 +205,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('PATCH category error:', error);
-
     return NextResponse.json(
       {
         message: 'خطایی در پردازش درخواست رخ داد',

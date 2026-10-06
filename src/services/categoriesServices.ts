@@ -27,3 +27,8 @@ export const getCategoryById = async (id: string) => {
   const { data } = await app.post(`/admin/categories/${id}`);
   return data;
 };
+
+export const updateCategorybyId = async (id: string) => {
+  const { data } = await app.patch(`/admin/categories/${id}`);
+  return data;
+};

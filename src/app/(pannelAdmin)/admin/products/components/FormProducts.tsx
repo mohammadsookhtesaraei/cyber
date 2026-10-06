@@ -7,16 +7,18 @@ import { ThreeDots } from 'react-loader-spinner';
 import FormButton from '@/components/ui/FormButton/FormButton';
 import InputForm from '@/components/ui/InputForm/InputForm';
 
-import { CategoryFormValues } from '@/schemas/category-schema';
+import { ProductFormValues } from '@/schemas/product-schema';
 
+import { productsFormData } from '@/constant/productsFormData';
 import { categoryTypes } from '@/constant/selectCategory';
 
 type FormCategoryProps = {
-  register: UseFormRegister<CategoryFormValues>;
+  register: UseFormRegister<ProductFormValues>;
   onSubmit: (e?: BaseSyntheticEvent) => void;
-  errors: FieldErrors<CategoryFormValues>;
+  errors: FieldErrors<ProductFormValues>;
   isPending: boolean;
 };
+
 const FormProducts = ({
   register,
   onSubmit,
@@ -24,36 +26,54 @@ const FormProducts = ({
   isPending,
 }: FormCategoryProps): ReactElement => {
   return (
-    <div>
-      <form className="max-w-md" onSubmit={onSubmit}>
-        <div className="relative">
-          <label htmlFor="type" className="mb-2 block">
-            نوع
-            <span className="text-red-500">*</span>
-          </label>
-          <select
-            className="bg-surface border-border focus:shadow-surface text-primary h-12 w-full rounded-xl border px-3.5 focus:shadow-md focus:outline-none"
-            id="type"
-            {...register('type')}
-          >
-            <option value="" disabled>
-              انتخاب کنید
-            </option>
-            {categoryTypes.map((item) => (
-              <option value={item.value} key={item.id}>
-                {item.label}
-              </option>
+    <div className="h-[calc(100dvh-80px)]">
+      <form className="flex h-full max-w-md flex-col" onSubmit={onSubmit}>
+        {/* بخش اسکرولی */}
+        <div className="sidebar-scrollbar flex-1 overflow-y-auto px-1 pb-4">
+          <div className="space-y-5">
+            {productsFormData.map((item) => (
+              <InputForm
+                key={item.id}
+                label={item.label}
+                {...register(item.name)}
+              />
             ))}
-          </select>
-          <span className="absolute right-0 bottom-0 w-full translate-y-1/1 text-sm text-rose-400">
-            {errors.type?.message}
-          </span>
+
+            <div className="relative">
+              <label htmlFor="type" className="mb-2 block">
+                نوع
+                <span className="text-red-500">*</span>
+              </label>
+
+              <select
+                id="type"
+                className="bg-surface border-border focus:shadow-surface text-primary h-12 w-full rounded-xl border px-3.5 focus:shadow-md focus:outline-none"
+                {...register('category')}
+              >
+                <option value="" disabled>
+                  انتخاب کنید
+                </option>
+
+                {categoryTypes.map((item) => (
+                  <option value={item.value} key={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+
+              <span className="absolute right-0 bottom-0 w-full translate-y-1/1 text-sm text-rose-400">
+                {errors.category?.message}
+              </span>
+            </div>
+          </div>
         </div>
-        <div>
+
+        {/* دکمه ثابت */}
+        <div className="border-border bg-surface shrink-0 border-t pt-4">
           <FormButton>
             {isPending ? (
               <ThreeDots
-                visible={true}
+                visible
                 height="30"
                 width="30"
                 color="#4fa94d"
@@ -71,4 +91,5 @@ const FormProducts = ({
     </div>
   );
 };
+
 export default FormProducts;

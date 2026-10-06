@@ -1,7 +1,11 @@
+import { ProductFormValues } from '@/schemas/product-schema';
+
+type ProductInputName = Exclude<keyof ProductFormValues, 'category' | 'tags'>;
+
 type ProductsFromDataType = {
   id: number;
   label: string;
-  name: string;
+  name: ProductInputName;
 };
 
 export const productsFormData: ProductsFromDataType[] = [

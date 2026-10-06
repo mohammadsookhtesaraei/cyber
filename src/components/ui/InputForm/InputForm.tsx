@@ -15,7 +15,7 @@ const InputForm = ({
 }: InputFormProps): ReactElement => {
   const id = useId();
   return (
-    <div className="relative my-6">
+    <div className="relative my-2">
       <label className="text-muted mb-2 block text-sm" htmlFor={id}>
         {label}
         <span className="text-red-500">*</span>

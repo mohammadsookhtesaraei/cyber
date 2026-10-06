@@ -13,6 +13,8 @@ export const useCategoriesByAdmin = () => {
   return useQuery({
     queryKey: ['get-categoryAdmin'],
     queryFn: getAllCategoryByAdminFn,
+    retry: false,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -27,7 +29,7 @@ export const useCreateCategory = () => {
 };
 
 // get one category
-export const useCategoryById = (id: string) => {
+export const useGetCategoryById = (id: string) => {
   return useQuery({
     queryKey: ['get-category', id],
     queryFn: () => getCategoryById(id),

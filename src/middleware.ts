@@ -10,7 +10,7 @@ const cookieOptions = {
   path: '/',
 };
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const { user, tokens } = await proxyAuth(request);
 

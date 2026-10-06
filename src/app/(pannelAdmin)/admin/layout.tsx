@@ -60,7 +60,7 @@ const AdminLayout = ({ children }: AdminProps) => {
           >
             <Menu />
           </button>
-          <h2>{title}</h2>
+          <h2 className="text-primary">{title}</h2>
         </div>
         <ThemeToggle />
       </div>

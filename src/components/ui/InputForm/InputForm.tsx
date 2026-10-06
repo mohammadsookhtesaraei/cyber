@@ -21,6 +21,7 @@ const InputForm = ({
         <span className="text-red-500">*</span>
       </label>
       <input
+        {...rest}
         dir={dir}
         className={clsx(
           error
@@ -30,7 +31,7 @@ const InputForm = ({
 
         id={id}
         type="text"
-        {...rest}
+
         autoComplete="off"
       />
       <span

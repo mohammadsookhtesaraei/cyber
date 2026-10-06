@@ -13,7 +13,7 @@ interface RouteContext {
   }>;
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
+export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     await connectDb();
 
@@ -36,7 +36,63 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       );
     }
 
+    const category = await Category.findById(id);
+
+    if (!category) {
+      return NextResponse.json(
+        {
+          message: 'دسته‌بندی موردنظر پیدا نشد',
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        category,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('GET category error:', error);
+
+    return NextResponse.json(
+      {
+        message: 'خطایی در پردازش درخواست رخ داد',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
+  try {
+    await connectDb();
+
+    const accessToken = request.cookies.get('accessToken')?.value;
+
+    const authorization = authorizeRole(accessToken, ['ADMIN']);
+
+    if (!authorization.authorized) {
+      return authorization.response;
+    }
+
+    const { id } = await params;
+
+    console.log('PATCH ID:', id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        {
+          message: 'شناسه دسته‌بندی نامعتبر است',
+        },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
+
+    console.log('PATCH BODY:', body);
 
     const { title, englishTitle, description, type, parentId, icon } = body;
 
@@ -141,12 +197,32 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       }
     }
 
+    console.log('BEFORE SAVE:', {
+      id: category._id.toString(),
+      title: category.title,
+      englishTitle: category.englishTitle,
+    });
+
     await category.save();
+
+    console.log('AFTER SAVE:', {
+      id: category._id.toString(),
+      title: category.title,
+      englishTitle: category.englishTitle,
+    });
+
+    const updatedCategory = await Category.findById(id);
+
+    console.log('DB AFTER SAVE:', {
+      id: updatedCategory?._id.toString(),
+      title: updatedCategory?.title,
+      englishTitle: updatedCategory?.englishTitle,
+    });
 
     return NextResponse.json(
       {
         message: 'دسته‌بندی با موفقیت ویرایش شد',
-        category,
+        category: updatedCategory,
       },
       { status: 200 }
     );
@@ -161,7 +237,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     );
   }
 }
-
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
     await connectDb();

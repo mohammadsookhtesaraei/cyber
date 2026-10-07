@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { profileFn } from '@/services/authServices';
+import { getAllUsersFn, profileFn } from '@/services/authServices';
 
 import { AuthenticatedUserResponse } from '@/types/user-interface';
 
@@ -17,3 +17,11 @@ export const useGetProfile = (): {
 
   return { data, isPending };
 };
+
+export const useGetUsers = () =>
+  useQuery({
+    queryKey: ['get-users'],
+    queryFn: getAllUsersFn,
+    retry: false,
+    refetchOnWindowFocus: true,
+  });

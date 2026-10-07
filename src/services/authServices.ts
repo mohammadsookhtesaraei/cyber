@@ -45,3 +45,12 @@ export const profileFn = async (): Promise<AuthenticatedUserResponse> => {
 export const logOutFn = (): Promise<LogOutResponse> => {
   return app.post('/auth/logout');
 };
+
+// pannel-admin
+
+// get all users
+
+export const getAllUsersFn = async () => {
+  const { data } = await app.get('/admin/users');
+  return data;
+};

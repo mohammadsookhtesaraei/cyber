@@ -20,3 +20,22 @@ export const createProductFn = async (product: ProductFormValuesType) => {
   const { data } = await app.post('/admin/products', product);
   return data;
 };
+
+// get product by ID service
+export const getProductByIdFn = async (id: string) => {
+  const { data } = await app.get(`/admin/products/${id}`);
+
+  return data;
+};
+
+// update category service
+export const updateProductbyIdFn = async ({
+  id,
+  values,
+}: {
+  id: string;
+  values: ProductFormValuesType;
+}) => {
+  const { data } = await app.patch(`/admin/products/${id}`, values);
+  return data;
+};

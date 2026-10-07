@@ -32,7 +32,7 @@ const Products = () => {
   return (
     <div className="px-4">
       <div className="my-2 flex w-fit items-center rounded-md bg-linear-180 from-[#2d2468] to-[#1b1640] p-2 text-white">
-        <Link href="/admin/categories/add">اضافه کردن محصول جدید</Link>
+        <Link href="/admin/products/add">اضافه کردن محصول جدید</Link>
       </div>
       <ProductsTable products={products} />
     </div>

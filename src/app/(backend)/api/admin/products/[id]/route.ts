@@ -15,6 +15,70 @@ interface RouteContext {
   }>;
 }
 
+export async function GET(_req: Request, context: RouteContext) {
+  try {
+    await connectDb();
+
+    const { id } = await context.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        {
+          message: 'شناسه محصول نامعتبر است',
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+
+    const authorization = authorizeRole(accessToken, ['ADMIN']);
+
+    if (!authorization.authorized) {
+      return authorization.response;
+    }
+
+    const product = await Product.findById(id)
+      .populate('category', 'title englishTitle')
+      .lean();
+
+    if (!product) {
+      return NextResponse.json(
+        {
+          message: 'محصول موردنظر پیدا نشد',
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message: 'محصول با موفقیت دریافت شد',
+        product,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error('GET product error:', error);
+
+    return NextResponse.json(
+      {
+        message: 'خطایی در پردازش درخواست رخ داد',
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
 export async function DELETE(_req: Request, context: RouteContext) {
   try {
     await connectDb();

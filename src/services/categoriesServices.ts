@@ -13,7 +13,7 @@ type TCategory = {
 // get all category service
 export const getAllCategoryByAdminFn = async () => {
   const { data } = await app.get('/admin/categories');
-  console.log('API CATEGORY LIST:', data);
+
   return data;
 };
 

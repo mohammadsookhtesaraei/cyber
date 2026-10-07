@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
-import { ReactElement } from 'react';
+import { useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -12,24 +12,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import axios from 'axios';
 
-import FormCategory from '../components/FormProducts';
 import toast from 'react-hot-toast';
 import { RotatingLines } from 'react-loader-spinner';
 
 import { useCategoriesByAdmin } from '@/hook/useCategories';
-import { useCreateProduct } from '@/hook/useProducts';
+import { useGetProductById, useUpdateProduct } from '@/hook/useProducts';
 
 import { ProductFormValues, productSchema } from '@/schemas/product-schema';
 
-const ProductsAddPage = (): ReactElement => {
+import FormProducts from '@/app/(pannelAdmin)/admin/products/components/FormProducts';
+
+const EditId = () => {
   const router = useRouter();
+  const { edit } = useParams<{ edit: string }>();
+
   const queryClient = useQueryClient();
+  const { data, isPending: isGettingProduct } = useGetProductById(edit);
+  const { product } = data || {};
+  console.log(product);
 
-  const { data, isPending: loadingData } = useCategoriesByAdmin();
+  const { mutateAsync, isPending: isUpdating } = useUpdateProduct();
+  const { data: categoriesData, isPending: loadingData } =
+    useCategoriesByAdmin();
 
-  const { categories } = data || {};
-  console.log(categories);
-  const { mutateAsync, isPending } = useCreateProduct();
+  const { categories } = categoriesData || {};
+
   const {
     register,
     reset,
@@ -53,21 +60,49 @@ const ProductsAddPage = (): ReactElement => {
     },
   });
 
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    reset({
+      title: product?.title,
+      description: product?.description,
+      brand: product?.brand,
+      countInStock: product?.countInStock.toString(),
+      price: product?.price.toString(),
+      category: product.category._id,
+      discount: product?.discount.toString(),
+      imageLink: product?.imageLink,
+      offPrice: product?.offPrice.toString(),
+      slug: product?.slug,
+      tags: product.tags ?? [],
+    });
+  }, [data?.product._id, reset]);
+
   const handleSubmitValue = async (values: ProductFormValues) => {
-    const product = {
+    const finalValues = {
       ...values,
       price: Number(values.price),
       offPrice: Number(values.offPrice),
       discount: Number(values.discount),
       countInStock: Number(values.countInStock),
     };
-    console.log(product);
+
+    const state = {
+      id: product?._id,
+      values: finalValues,
+    };
     try {
-      const { message } = await mutateAsync(product);
+      const { message } = await mutateAsync(state);
       toast.success(message);
       reset();
       queryClient.invalidateQueries({
         queryKey: ['get-products'],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['get-product', edit],
       });
       router.push('/admin/products');
     } catch (error) {
@@ -79,9 +114,9 @@ const ProductsAddPage = (): ReactElement => {
     }
   };
 
-  if (loadingData) {
+  if (isGettingProduct || loadingData) {
     return (
-      <div className="flex min-h-50 items-center justify-center">
+      <div className="flex min-h-50 w-full justify-center">
         <RotatingLines
           visible={true}
           height="30"
@@ -96,18 +131,18 @@ const ProductsAddPage = (): ReactElement => {
       </div>
     );
   }
-
   return (
     <div className="px-4">
-      <FormCategory
+      <h2 className="text-primary">ویرایش محصول</h2>
+      <FormProducts
         register={register}
         onSubmit={handleSubmit(handleSubmitValue)}
-        errors={errors}
-        isPending={isPending}
         control={control}
+        errors={errors}
+        isPending={isUpdating}
         categories={categories}
       />
     </div>
   );
 };
-export default ProductsAddPage;
+export default EditId;

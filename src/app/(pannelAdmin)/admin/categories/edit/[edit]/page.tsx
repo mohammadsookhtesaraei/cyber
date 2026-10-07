@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { ReactElement, useEffect } from 'react';
 
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useForm } from 'react-hook-form';
 

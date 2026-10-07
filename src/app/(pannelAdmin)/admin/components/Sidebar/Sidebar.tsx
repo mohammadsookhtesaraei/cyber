@@ -38,7 +38,7 @@ const Sidebar = ({
       transition={{
         duration: 0.4,
       }}
-      className={`${style} h-dvh overflow-hidden bg-linear-180 from-[#2d2468] to-[#1b1640] md:h-auto md:transform-none! md:opacity-100!`}
+      className={`${style} h-dvh! overflow-hidden bg-linear-180 from-[#2d2468] to-[#1b1640] md:h-auto md:transform-none! md:opacity-100!`}
     >
       {/* header */}
       <div className="flex items-center justify-between p-4">

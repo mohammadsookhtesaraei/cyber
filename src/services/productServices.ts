@@ -1,8 +1,6 @@
 import app from '@/services/httpService';
 
-import { ProductFormValues } from '@/schemas/product-schema';
-
-import { IProduct } from '@/model/Product';
+import { ProductFormValuesType } from '@/types/product-interface';
 
 // pannel admin services
 
@@ -18,7 +16,7 @@ export const removeProductFn = async (id: string) => {
 };
 
 // create Product service
-export const createProductFn = async (product: ProductFormValues) => {
-  const { data } = await app.post('/admin/product', product);
+export const createProductFn = async (product: ProductFormValuesType) => {
+  const { data } = await app.post('/admin/products', product);
   return data;
 };

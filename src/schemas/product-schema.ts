@@ -17,7 +17,7 @@ export const productSchema = z.object({
 
   category: z.string().min(1, 'دسته‌بندی را انتخاب کنید'),
 
-  imageLink: z.string().trim().url('لینک تصویر معتبر نیست'),
+  imageLink: z.string().trim(),
 
   price: z
     .string()
@@ -26,16 +26,19 @@ export const productSchema = z.object({
 
   offPrice: z
     .string()
-    .min(1, 'قیمت با تخفیف را وارد کنید')
-    .refine((value) => Number(value) >= 0, 'قیمت با تخفیف نمی‌تواند منفی باشد'),
+    .refine(
+      (value) => value === '' || Number(value) >= 0,
+      'قیمت با تخفیف نمی‌تواند منفی باشد'
+    )
+    .optional(),
 
   discount: z
     .string()
-    .min(1, 'تخفیف را وارد کنید')
     .refine(
-      (value) => Number(value) >= 0 && Number(value) <= 100,
+      (value) => value === '' || (Number(value) >= 0 && Number(value) <= 100),
       'تخفیف باید بین ۰ تا ۱۰۰ باشد'
-    ),
+    )
+    .optional(),
 
   brand: z.string().trim().min(1, 'برند را وارد کنید'),
 

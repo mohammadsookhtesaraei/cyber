@@ -15,8 +15,9 @@ import InputForm from '@/components/ui/InputForm/InputForm';
 
 import { ProductFormValues } from '@/schemas/product-schema';
 
+import { ICategory } from '@/types/category-interface';
+
 import { productsFormData } from '@/constant/productsFormData';
-import { categoryTypes } from '@/constant/selectCategory';
 
 type FormCategoryProps = {
   register: UseFormRegister<ProductFormValues>;
@@ -24,6 +25,7 @@ type FormCategoryProps = {
   errors: FieldErrors<ProductFormValues>;
   isPending: boolean;
   control: Control<ProductFormValues>;
+  categories: ICategory[];
 };
 
 const FormProducts = ({
@@ -32,8 +34,8 @@ const FormProducts = ({
   errors,
   isPending,
   control,
+  categories,
 }: FormCategoryProps): ReactElement => {
-  console.log(errors);
   return (
     <div className="h-[calc(100dvh-80px)]">
       <form className="flex h-full max-w-md flex-col" onSubmit={onSubmit}>
@@ -46,6 +48,7 @@ const FormProducts = ({
                 label={item.label}
                 {...register(item.name)}
                 error={errors[item.name]?.message}
+                dir={item.dir}
               />
             ))}
 
@@ -87,9 +90,9 @@ const FormProducts = ({
                   انتخاب کنید
                 </option>
 
-                {categoryTypes.map((item) => (
-                  <option value={item.value} key={item.id}>
-                    {item.label}
+                {categories.map((item) => (
+                  <option value={item._id} key={item._id}>
+                    {item.title}
                   </option>
                 ))}
               </select>

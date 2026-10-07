@@ -14,7 +14,9 @@ import axios from 'axios';
 
 import FormCategory from '../components/FormProducts';
 import toast from 'react-hot-toast';
+import { RotatingLines } from 'react-loader-spinner';
 
+import { useCategoriesByAdmin } from '@/hook/useCategories';
 import { useCreateProduct } from '@/hook/useProducts';
 
 import { ProductFormValues, productSchema } from '@/schemas/product-schema';
@@ -22,6 +24,11 @@ import { ProductFormValues, productSchema } from '@/schemas/product-schema';
 const ProductsAddPage = (): ReactElement => {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { data, isPending: loadingData } = useCategoriesByAdmin();
+
+  const { categories } = data || {};
+  console.log(categories);
   const { mutateAsync, isPending } = useCreateProduct();
   const {
     register,
@@ -47,8 +54,18 @@ const ProductsAddPage = (): ReactElement => {
   });
 
   const handleSubmitValue = async (values: ProductFormValues) => {
+    console.log(values);
+
+    const product = {
+      ...values,
+      price: Number(values.price),
+      offPrice: Number(values.offPrice),
+      discount: Number(values.discount),
+      countInStock: Number(values.countInStock),
+    };
+    console.log(product);
     try {
-      const { message } = await mutateAsync(values);
+      const { message } = await mutateAsync(product);
       toast.success(message);
       reset();
       queryClient.invalidateQueries({
@@ -64,6 +81,24 @@ const ProductsAddPage = (): ReactElement => {
     }
   };
 
+  if (loadingData) {
+    return (
+      <div className="flex min-h-50 items-center justify-center">
+        <RotatingLines
+          visible={true}
+          height="30"
+          width="30"
+          color="green"
+          strokeWidth="3"
+          animationDuration="0.75"
+          ariaLabel="rotating-lines-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="px-4">
       <FormCategory
@@ -72,6 +107,7 @@ const ProductsAddPage = (): ReactElement => {
         errors={errors}
         isPending={isPending}
         control={control}
+        categories={categories}
       />
     </div>
   );

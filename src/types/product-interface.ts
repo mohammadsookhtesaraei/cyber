@@ -34,3 +34,21 @@ export interface IProduct {
 
   __v: number;
 }
+
+export type ProductFormValuesType = {
+  title: string;
+  slug: string;
+  description: string;
+
+  brand: string;
+  category: string;
+
+  price: number;
+  offPrice: number;
+  discount: number;
+  countInStock: number;
+
+  imageLink: string;
+
+  tags: string[];
+};

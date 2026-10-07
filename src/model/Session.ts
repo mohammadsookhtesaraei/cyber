@@ -1,9 +1,22 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ISession extends Document {
   userId: mongoose.Types.ObjectId;
 
+  // Refresh Token فعلی
   refreshTokenHash: string;
+
+  // Refresh Token قبلی برای جلوگیری از Race Condition
+  previousRefreshTokenHash?: string | null;
+
+  // پایان Grace Period توکن قبلی
+  previousRefreshTokenExpiresAt?: Date | null;
+
+  // آخرین Access Token تولیدشده
+  currentAccessToken?: string | null;
+
+  // آخرین Refresh Token تولیدشده
+  currentRefreshToken?: string | null;
 
   userAgent?: string | null;
 
@@ -18,34 +31,49 @@ export interface ISession extends Document {
 
 const sessionSchema = new Schema<ISession>(
   {
-    // User who owns this session
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true,
     },
 
-    // Hashed refresh token
     refreshTokenHash: {
       type: String,
       required: true,
       unique: true,
     },
 
-    // Device / browser information
+    previousRefreshTokenHash: {
+      type: String,
+      default: null,
+    },
+
+    previousRefreshTokenExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    currentAccessToken: {
+      type: String,
+      default: null,
+    },
+
+    currentRefreshToken: {
+      type: String,
+      default: null,
+    },
+
     userAgent: {
       type: String,
       default: null,
     },
 
-    // IP address used for this session
     ipAddress: {
       type: String,
       default: null,
     },
 
-    // Session expiration date
     expiresAt: {
       type: Date,
       required: true,
@@ -58,7 +86,6 @@ const sessionSchema = new Schema<ISession>(
 );
 
 const Session =
-  mongoose.models.Session ||
-  mongoose.model<ISession>("Session", sessionSchema);
+  mongoose.models.Session || mongoose.model<ISession>('Session', sessionSchema);
 
 export default Session;

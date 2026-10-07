@@ -32,7 +32,7 @@ export const createCategoryFn = async (category: TCategory) => {
 // get category by ID service
 export const getCategoryById = async (id: string) => {
   const { data } = await app.get(`/admin/categories/${id}`);
-  console.log('API CATEGORY:', data.category);
+
   return data;
 };
 

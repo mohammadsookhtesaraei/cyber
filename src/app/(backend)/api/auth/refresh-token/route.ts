@@ -12,6 +12,9 @@ import connectDb from '@/utils/connectDb';
 import Session from '@/model/Session';
 import User from '@/model/User';
 
+const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
+const GRACE_PERIOD = 10 * 1000; // 10 seconds
+
 export async function POST(req: Request) {
   try {
     await connectDb();
@@ -24,9 +27,7 @@ export async function POST(req: Request) {
         {
           message: 'Refresh token is required',
         },
-        {
-          status: 401,
-        }
+        { status: 401 }
       );
     }
 
@@ -37,9 +38,7 @@ export async function POST(req: Request) {
         {
           message: 'Refresh token is invalid or expired',
         },
-        {
-          status: 401,
-        }
+        { status: 401 }
       );
     }
 
@@ -52,15 +51,21 @@ export async function POST(req: Request) {
         {
           message: 'User not found',
         },
-        {
-          status: 404,
-        }
+        { status: 404 }
       );
     }
 
     const session = await Session.findOne({
       userId: user._id,
-      refreshTokenHash,
+      $or: [
+        { refreshTokenHash },
+        {
+          previousRefreshTokenHash: refreshTokenHash,
+          previousRefreshTokenExpiresAt: {
+            $gt: new Date(),
+          },
+        },
+      ],
     });
 
     if (!session) {
@@ -68,9 +73,7 @@ export async function POST(req: Request) {
         {
           message: 'Session not found',
         },
-        {
-          status: 401,
-        }
+        { status: 401 }
       );
     }
 
@@ -83,9 +86,63 @@ export async function POST(req: Request) {
         {
           message: 'Session expired',
         },
+        { status: 401 }
+      );
+    }
+
+    /*
+     * اگر درخواست با Refresh Token قبلی
+     * در Grace Period رسیده باشد،
+     * همان Tokenهای جدید را برمی‌گردانیم.
+     */
+    if (
+      session.previousRefreshTokenHash === refreshTokenHash &&
+      session.previousRefreshTokenExpiresAt &&
+      session.previousRefreshTokenExpiresAt > new Date()
+    ) {
+      if (!session.currentAccessToken || !session.currentRefreshToken) {
+        return NextResponse.json(
+          {
+            message: 'Refresh session is invalid',
+          },
+          { status: 401 }
+        );
+      }
+
+      const response = NextResponse.json({
+        message: 'Tokens refreshed successfully',
+      });
+
+      response.cookies.set('accessToken', session.currentAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 15 * 60,
+      });
+
+      response.cookies.set('refreshToken', session.currentRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: REFRESH_TOKEN_MAX_AGE,
+      });
+
+      return response;
+    }
+
+    /*
+     * از اینجا به بعد فقط Refresh Token فعلی
+     * اجازه Rotation دارد.
+     */
+
+    if (session.refreshTokenHash !== refreshTokenHash) {
+      return NextResponse.json(
         {
-          status: 401,
-        }
+          message: 'Refresh token already used',
+        },
+        { status: 401 }
       );
     }
 
@@ -106,31 +163,86 @@ export async function POST(req: Request) {
 
     const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
 
+    /*
+     * Refresh Token فعلی را تبدیل به previous می‌کنیم
+     * تا چند ثانیه درخواست‌های همزمان بتوانند
+     * Tokenهای جدید را دریافت کنند.
+     */
     const updatedSession = await Session.findOneAndUpdate(
       {
         _id: session._id,
         refreshTokenHash,
       },
       {
-        refreshTokenHash: newRefreshTokenHash,
-        userAgent,
-        ipAddress,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        $set: {
+          previousRefreshTokenHash: refreshTokenHash,
+
+          previousRefreshTokenExpiresAt: new Date(Date.now() + GRACE_PERIOD),
+
+          refreshTokenHash: newRefreshTokenHash,
+
+          currentAccessToken: newAccessToken,
+
+          currentRefreshToken: newRefreshToken,
+
+          userAgent,
+
+          ipAddress,
+
+          expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000),
+        },
       },
       {
         new: true,
       }
     );
 
+    /*
+     * درخواست دیگری قبل از این درخواست Rotation
+     * را انجام داده است.
+     */
     if (!updatedSession) {
-      return NextResponse.json(
-        {
-          message: 'Refresh token already used',
+      const latestSession = await Session.findOne({
+        _id: session._id,
+        previousRefreshTokenHash: refreshTokenHash,
+        previousRefreshTokenExpiresAt: {
+          $gt: new Date(),
         },
-        {
-          status: 401,
-        }
-      );
+      });
+
+      if (
+        !latestSession?.currentAccessToken ||
+        !latestSession.currentRefreshToken
+      ) {
+        return NextResponse.json(
+          {
+            message: 'Refresh token already used',
+          },
+          { status: 401 }
+        );
+      }
+
+      const response = NextResponse.json({
+        message: 'Tokens refreshed successfully',
+      });
+
+      response.cookies.set('accessToken', latestSession.currentAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 15 * 60,
+      });
+
+      response.cookies.set('refreshToken', latestSession.currentRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: REFRESH_TOKEN_MAX_AGE,
+      });
+
+      return response;
     }
 
     const response = NextResponse.json({
@@ -150,7 +262,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return response;
@@ -161,9 +273,7 @@ export async function POST(req: Request) {
       {
         message: 'Something went wrong',
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

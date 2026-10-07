@@ -7,7 +7,7 @@ export const couponSchema = z.object({
 
   amount: z.number().min(0, 'مقدار تخفیف نمی‌تواند منفی باشد'),
 
-  expireDate: z.string().min(1, 'تاریخ انقضا را وارد کنید'),
+  expireDate: z.date(),
 
   isActive: z.boolean(),
 

@@ -120,16 +120,16 @@ export const adminRoutes: AdminRoute[] = [
   },
   {
     title: 'تخفیف‌ها',
-    href: '/admin/discounts',
+    href: '/admin/coupons',
     icon: '🎟️',
     children: [
       {
         title: 'همه کدهای تخفیف',
-        href: '/admin/discounts',
+        href: '/admin/coupons',
       },
       {
         title: 'افزودن کد تخفیف',
-        href: '/admin/discounts/add',
+        href: '/admin/coupons/add',
       },
     ],
   },

@@ -43,7 +43,7 @@ export const profileFn = async (): Promise<AuthenticatedUserResponse> => {
 // log out
 
 export const logOutFn = (): Promise<LogOutResponse> => {
-  return app.post('/auth/logout');
+  return app.post('/auth/logout-all');
 };
 
 // pannel-admin

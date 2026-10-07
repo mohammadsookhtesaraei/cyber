@@ -13,8 +13,10 @@ import Session from '@/model/Session';
 import User from '@/model/User';
 
 const OTP_VERIFY_WINDOW_MS = 2 * 60 * 1000;
-
 const MAX_OTP_VERIFY_ATTEMPTS = 5;
+
+const ACCESS_TOKEN_MAX_AGE = 15 * 60;
+const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +25,6 @@ export async function POST(req: Request) {
 
     // Get request body
     const body = await req.json();
-
     const { phoneNumber, otp } = body;
 
     // Validate request
@@ -178,54 +179,46 @@ export async function POST(req: Request) {
     const refreshTokenHash = hashRefreshToken(refreshToken);
 
     // Create session
-    await Session.create({
+    const session = await Session.create({
       userId: user._id,
       refreshTokenHash,
       userAgent,
       ipAddress,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000),
     });
+
+    console.log('✅ SESSION CREATED:', session._id);
+    console.log('✅ SESSION HASH:', session.refreshTokenHash);
 
     // Create response
     const response = NextResponse.json({
       message: 'شماره موبایل با موفقیت تایید شد',
-
       userId: user._id,
-
       isVerifiedPhoneNumber: user.isVerifiedPhoneNumber,
-
       isActive: user.isActive,
     });
 
     // Access token cookie
     response.cookies.set('accessToken', accessToken, {
       httpOnly: true,
-
       secure: process.env.NODE_ENV === 'production',
-
       sameSite: 'lax',
-
       path: '/',
-
-      maxAge: 10 * 60,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
 
     // Refresh token cookie
     response.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
-
       secure: process.env.NODE_ENV === 'production',
-
       sameSite: 'lax',
-
       path: '/',
-
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return response;
   } catch (error) {
-    console.log(error);
+    console.error('VERIFY OTP ERROR:', error);
 
     return NextResponse.json(
       {

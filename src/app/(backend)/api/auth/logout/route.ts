@@ -1,51 +1,56 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import Session from "@/model/Session";
+import { hashRefreshToken } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
 
-import { hashRefreshToken } from "@/utils/auth";
+import Session from '@/model/Session';
 
 export async function POST() {
   try {
-    // Connect to database
     await connectDb();
 
-    // Get cookies
     const cookieStore = await cookies();
 
-    // Get refresh token from HttpOnly cookie
-    const refreshToken =
-      cookieStore.get("refreshToken")?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    // Create response
-    const response = NextResponse.json({
-      message: "Logout successful",
-    });
-
-    // If refresh token exists, remove session
+    /*
+     * اگر Refresh Token وجود داشته باشد،
+     * Session مربوط به آن را revoke می‌کنیم.
+     */
     if (refreshToken) {
-      const refreshTokenHash =
-        hashRefreshToken(refreshToken);
+      const refreshTokenHash = hashRefreshToken(refreshToken);
 
-      await Session.findOneAndDelete({
-        refreshTokenHash,
-      });
+      await Session.findOneAndUpdate(
+        {
+          refreshTokenHash,
+          revokedAt: null,
+        },
+        {
+          $set: {
+            revokedAt: new Date(),
+          },
+        }
+      );
     }
 
-    // Delete access token cookie
-    response.cookies.delete("accessToken");
+    /*
+     * Cookieها را از Browser حذف می‌کنیم.
+     */
+    const response = NextResponse.json({
+      message: 'Logout successful',
+    });
 
-    // Delete refresh token cookie
-    response.cookies.delete("refreshToken");
+    response.cookies.delete('accessToken');
+    response.cookies.delete('refreshToken');
 
     return response;
   } catch (error) {
-    console.log(error);
+    console.error('LOGOUT ERROR:', error);
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

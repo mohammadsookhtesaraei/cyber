@@ -3,29 +3,20 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface ISession extends Document {
   userId: mongoose.Types.ObjectId;
 
-  // Refresh Token فعلی
+  // Hash توکن فعلی
   refreshTokenHash: string;
 
-  // Refresh Token قبلی برای جلوگیری از Race Condition
+  // فقط برای مدیریت درخواست‌های همزمان
   previousRefreshTokenHash?: string | null;
-
-  // پایان Grace Period توکن قبلی
   previousRefreshTokenExpiresAt?: Date | null;
 
-  // آخرین Access Token تولیدشده
-  currentAccessToken?: string | null;
-
-  // آخرین Refresh Token تولیدشده
-  currentRefreshToken?: string | null;
-
   userAgent?: string | null;
-
   ipAddress?: string | null;
 
   expiresAt: Date;
+  revokedAt?: Date | null;
 
   createdAt: Date;
-
   updatedAt: Date;
 }
 
@@ -54,16 +45,6 @@ const sessionSchema = new Schema<ISession>(
       default: null,
     },
 
-    currentAccessToken: {
-      type: String,
-      default: null,
-    },
-
-    currentRefreshToken: {
-      type: String,
-      default: null,
-    },
-
     userAgent: {
       type: String,
       default: null,
@@ -78,6 +59,11 @@ const sessionSchema = new Schema<ISession>(
       type: Date,
       required: true,
       index: true,
+    },
+
+    revokedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

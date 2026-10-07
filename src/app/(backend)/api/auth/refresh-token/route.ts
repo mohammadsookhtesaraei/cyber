@@ -13,52 +13,84 @@ import Session from '@/model/Session';
 import User from '@/model/User';
 
 const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
-const GRACE_PERIOD = 10 * 1000; // 10 seconds
+const GRACE_PERIOD = 10 * 1000;
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     await connectDb();
 
     const cookieStore = await cookies();
+
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
+    console.log('========== REFRESH TOKEN ==========');
+    console.log('REFRESH TOKEN EXISTS:', !!refreshToken);
+
     if (!refreshToken) {
+      console.log('❌ REFRESH TOKEN NOT FOUND');
+
       return NextResponse.json(
         {
-          message: 'Refresh token is required',
+          message: 'Refresh token وجود ندارد',
         },
-        { status: 401 }
+        {
+          status: 401,
+        }
       );
     }
 
+    // Verify refresh token
     const payload = verifyRefreshToken(refreshToken);
 
+    console.log('REFRESH PAYLOAD:', payload);
+
     if (!payload) {
+      console.log('❌ REFRESH TOKEN INVALID');
+
       return NextResponse.json(
         {
-          message: 'Refresh token is invalid or expired',
+          message: 'Refresh token نامعتبر یا منقضی شده است',
         },
-        { status: 401 }
+        {
+          status: 401,
+        }
       );
     }
 
-    const refreshTokenHash = hashRefreshToken(refreshToken);
+    const { userId } = payload;
 
-    const user = await User.findById(payload.userId);
+    console.log('USER ID:', userId);
+
+    // Find user
+    const user = await User.findById(userId);
+
+    console.log('USER FOUND:', !!user);
 
     if (!user) {
+      console.log('❌ USER NOT FOUND');
+
       return NextResponse.json(
         {
-          message: 'User not found',
+          message: 'کاربر پیدا نشد',
         },
-        { status: 404 }
+        {
+          status: 401,
+        }
       );
     }
 
+    // Hash refresh token
+    const refreshTokenHash = hashRefreshToken(refreshToken);
+
+    console.log('REFRESH HASH:', refreshTokenHash);
+
+    // Find session
     const session = await Session.findOne({
-      userId: user._id,
+      userId,
       $or: [
-        { refreshTokenHash },
+        {
+          refreshTokenHash,
+        },
         {
           previousRefreshTokenHash: refreshTokenHash,
           previousRefreshTokenExpiresAt: {
@@ -68,50 +100,55 @@ export async function POST(req: Request) {
       ],
     });
 
+    console.log('SESSION FOUND:', !!session);
+
     if (!session) {
-      return NextResponse.json(
-        {
-          message: 'Session not found',
-        },
-        { status: 401 }
-      );
-    }
-
-    if (new Date() > session.expiresAt) {
-      await Session.deleteOne({
-        _id: session._id,
-      });
+      console.log('❌ SESSION NOT FOUND');
 
       return NextResponse.json(
         {
-          message: 'Session expired',
+          message: 'Session معتبر نیست',
         },
-        { status: 401 }
+        {
+          status: 401,
+        }
       );
     }
 
-    /*
-     * اگر درخواست با Refresh Token قبلی
-     * در Grace Period رسیده باشد،
-     * همان Tokenهای جدید را برمی‌گردانیم.
-     */
-    if (
+    // Check if this is the previous refresh token
+    const isPreviousToken =
       session.previousRefreshTokenHash === refreshTokenHash &&
       session.previousRefreshTokenExpiresAt &&
-      session.previousRefreshTokenExpiresAt > new Date()
-    ) {
+      session.previousRefreshTokenExpiresAt > new Date();
+
+    console.log('IS PREVIOUS TOKEN:', isPreviousToken);
+
+    // If previous token is used during grace period,
+    // return the current tokens
+    if (isPreviousToken) {
+      console.log('♻️ RETURN CURRENT TOKENS');
+
       if (!session.currentAccessToken || !session.currentRefreshToken) {
+        console.log('❌ CURRENT TOKENS NOT FOUND');
+
         return NextResponse.json(
           {
-            message: 'Refresh session is invalid',
+            message: 'توکن فعلی Session پیدا نشد',
           },
-          { status: 401 }
+          {
+            status: 401,
+          }
         );
       }
 
-      const response = NextResponse.json({
-        message: 'Tokens refreshed successfully',
-      });
+      const response = NextResponse.json(
+        {
+          message: 'توکن با موفقیت بازیابی شد',
+        },
+        {
+          status: 200,
+        }
+      );
 
       response.cookies.set('accessToken', session.currentAccessToken, {
         httpOnly: true,
@@ -132,27 +169,8 @@ export async function POST(req: Request) {
       return response;
     }
 
-    /*
-     * از اینجا به بعد فقط Refresh Token فعلی
-     * اجازه Rotation دارد.
-     */
-
-    if (session.refreshTokenHash !== refreshTokenHash) {
-      return NextResponse.json(
-        {
-          message: 'Refresh token already used',
-        },
-        { status: 401 }
-      );
-    }
-
-    const userAgent =
-      req.headers.get('user-agent') || session.userAgent || undefined;
-
-    const forwardedFor = req.headers.get('x-forwarded-for');
-
-    const ipAddress =
-      forwardedFor?.split(',')[0]?.trim() || session.ipAddress || undefined;
+    // Generate new tokens
+    console.log('🔄 GENERATING NEW TOKENS');
 
     const newAccessToken = generateAccessToken(user._id.toString(), user.role);
 
@@ -163,11 +181,7 @@ export async function POST(req: Request) {
 
     const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
 
-    /*
-     * Refresh Token فعلی را تبدیل به previous می‌کنیم
-     * تا چند ثانیه درخواست‌های همزمان بتوانند
-     * Tokenهای جدید را دریافت کنند.
-     */
+    // Update session
     const updatedSession = await Session.findOneAndUpdate(
       {
         _id: session._id,
@@ -185,48 +199,56 @@ export async function POST(req: Request) {
 
           currentRefreshToken: newRefreshToken,
 
-          userAgent,
-
-          ipAddress,
-
           expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000),
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
       }
     );
 
-    /*
-     * درخواست دیگری قبل از این درخواست Rotation
-     * را انجام داده است.
-     */
+    console.log('SESSION UPDATED:', !!updatedSession);
+
+    // Race condition
     if (!updatedSession) {
-      const latestSession = await Session.findOne({
-        _id: session._id,
+      console.log('⚠️ SESSION UPDATE LOST RACE');
+
+      const raceSession = await Session.findOne({
+        userId,
         previousRefreshTokenHash: refreshTokenHash,
         previousRefreshTokenExpiresAt: {
           $gt: new Date(),
         },
       });
 
+      console.log('RACE SESSION FOUND:', !!raceSession);
+
       if (
-        !latestSession?.currentAccessToken ||
-        !latestSession.currentRefreshToken
+        !raceSession?.currentAccessToken ||
+        !raceSession?.currentRefreshToken
       ) {
+        console.log('❌ RACE TOKENS NOT FOUND');
+
         return NextResponse.json(
           {
-            message: 'Refresh token already used',
+            message: 'Session معتبر نیست',
           },
-          { status: 401 }
+          {
+            status: 401,
+          }
         );
       }
 
-      const response = NextResponse.json({
-        message: 'Tokens refreshed successfully',
-      });
+      const response = NextResponse.json(
+        {
+          message: 'توکن با موفقیت بازیابی شد',
+        },
+        {
+          status: 200,
+        }
+      );
 
-      response.cookies.set('accessToken', latestSession.currentAccessToken, {
+      response.cookies.set('accessToken', raceSession.currentAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -234,7 +256,7 @@ export async function POST(req: Request) {
         maxAge: 15 * 60,
       });
 
-      response.cookies.set('refreshToken', latestSession.currentRefreshToken, {
+      response.cookies.set('refreshToken', raceSession.currentRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -245,9 +267,17 @@ export async function POST(req: Request) {
       return response;
     }
 
-    const response = NextResponse.json({
-      message: 'Tokens refreshed successfully',
-    });
+    // Success
+    console.log('✅ REFRESH SUCCESS');
+
+    const response = NextResponse.json(
+      {
+        message: 'Access token با موفقیت refresh شد',
+      },
+      {
+        status: 200,
+      }
+    );
 
     response.cookies.set('accessToken', newAccessToken, {
       httpOnly: true,
@@ -267,13 +297,15 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error('REFRESH TOKEN ERROR:', error);
+    console.error('❌ REFRESH ERROR:', error);
 
     return NextResponse.json(
       {
-        message: 'Something went wrong',
+        message: 'خطایی در refresh token رخ داد',
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

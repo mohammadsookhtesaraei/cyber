@@ -47,10 +47,6 @@ export const adminRoutes: AdminRoute[] = [
         title: 'افزودن محصول',
         href: '/admin/products/add',
       },
-      {
-        title: 'دسته‌بندی‌ها',
-        href: '/admin/products/category',
-      },
     ],
   },
   {

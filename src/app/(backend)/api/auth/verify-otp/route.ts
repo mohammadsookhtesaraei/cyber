@@ -207,7 +207,7 @@ export async function POST(req: Request) {
 
       path: '/',
 
-      maxAge: 15 * 60,
+      maxAge: 10 * 60,
     });
 
     // Refresh token cookie

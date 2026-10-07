@@ -17,7 +17,7 @@ export function generateAccessToken(userId: string, role: 'USER' | 'ADMIN') {
   return jwt.sign(
     { userId, role, tokenType: 'access' },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: '15s' }
+    { expiresIn: '15m' }
   );
 }
 

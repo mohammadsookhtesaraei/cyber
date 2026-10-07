@@ -19,23 +19,32 @@ export const productSchema = z.object({
 
   imageLink: z.string().trim().url('لینک تصویر معتبر نیست'),
 
-  price: z.number().min(0, 'قیمت نمی‌تواند منفی باشد'),
+  price: z
+    .string()
+    .min(1, 'قیمت را وارد کنید')
+    .refine((value) => Number(value) >= 0, 'قیمت نمی‌تواند منفی باشد'),
 
-  offPrice: z.number().min(0, 'قیمت با تخفیف نمی‌تواند منفی باشد'),
+  offPrice: z
+    .string()
+    .min(1, 'قیمت با تخفیف را وارد کنید')
+    .refine((value) => Number(value) >= 0, 'قیمت با تخفیف نمی‌تواند منفی باشد'),
 
   discount: z
-    .number()
-    .min(0, 'تخفیف نمی‌تواند کمتر از ۰ باشد')
-    .max(100, 'تخفیف نمی‌تواند بیشتر از ۱۰۰ باشد'),
+    .string()
+    .min(1, 'تخفیف را وارد کنید')
+    .refine(
+      (value) => Number(value) >= 0 && Number(value) <= 100,
+      'تخفیف باید بین ۰ تا ۱۰۰ باشد'
+    ),
 
   brand: z.string().trim().min(1, 'برند را وارد کنید'),
 
   tags: z.array(z.string().trim()).min(1, 'حداقل یک تگ وارد کنید'),
 
   countInStock: z
-    .number()
-    .int('تعداد موجودی باید عدد صحیح باشد')
-    .min(0, 'موجودی نمی‌تواند منفی باشد'),
+    .string()
+    .min(1, 'موجودی را وارد کنید')
+    .refine((value) => Number(value) >= 0, 'موجودی نمی‌تواند منفی باشد'),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

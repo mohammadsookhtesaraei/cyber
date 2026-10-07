@@ -31,6 +31,19 @@ const ProductsAddPage = (): ReactElement => {
     control,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      brand: '',
+      countInStock: '',
+      price: '',
+      category: '',
+      discount: '',
+      imageLink: '',
+      offPrice: '',
+      slug: '',
+      tags: [],
+    },
   });
 
   const handleSubmitValue = async (values: ProductFormValues) => {

@@ -33,17 +33,19 @@ const FormProducts = ({
   isPending,
   control,
 }: FormCategoryProps): ReactElement => {
+  console.log(errors);
   return (
     <div className="h-[calc(100dvh-80px)]">
       <form className="flex h-full max-w-md flex-col" onSubmit={onSubmit}>
         {/* بخش اسکرولی */}
         <div className="sidebar-scrollbar flex-1 overflow-y-auto px-1 pb-4">
-          <div className="space-y-5">
+          <div className="">
             {productsFormData.map((item) => (
               <InputForm
                 key={item.id}
                 label={item.label}
                 {...register(item.name)}
+                error={errors[item.name]?.message}
               />
             ))}
 

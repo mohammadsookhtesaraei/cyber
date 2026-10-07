@@ -1,8 +1,14 @@
 import { BaseSyntheticEvent, ReactElement } from 'react';
 
-import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  UseFormRegister,
+} from 'react-hook-form';
 
 import { ThreeDots } from 'react-loader-spinner';
+import { TagsInput } from 'react-tag-input-component';
 
 import FormButton from '@/components/ui/FormButton/FormButton';
 import InputForm from '@/components/ui/InputForm/InputForm';
@@ -17,6 +23,7 @@ type FormCategoryProps = {
   onSubmit: (e?: BaseSyntheticEvent) => void;
   errors: FieldErrors<ProductFormValues>;
   isPending: boolean;
+  control: Control<ProductFormValues>;
 };
 
 const FormProducts = ({
@@ -24,6 +31,7 @@ const FormProducts = ({
   onSubmit,
   errors,
   isPending,
+  control,
 }: FormCategoryProps): ReactElement => {
   return (
     <div className="h-[calc(100dvh-80px)]">
@@ -38,6 +46,29 @@ const FormProducts = ({
                 {...register(item.name)}
               />
             ))}
+
+            <div>
+              <label className="mb-4 block" htmlFor="tags">
+                تگ محصولات
+              </label>
+
+              <Controller
+                name="tags"
+                control={control}
+                render={({ field }) => (
+                  <TagsInput
+                    value={field.value ?? []}
+                    onChange={field.onChange}
+                    name="tags"
+                    placeHolder="تگ را وارد کنید"
+                  />
+                )}
+              />
+
+              <span className="text-sm text-rose-400">
+                {errors.tags?.message}
+              </span>
+            </div>
 
             <div className="relative">
               <label htmlFor="type" className="mb-2 block">

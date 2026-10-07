@@ -14,12 +14,12 @@ interface ProxyAuthResult {
   tokens: Tokens | null;
 }
 
+// اطلاعات کاربر را با Access Token می‌گیرد
 const getUser = async (
   accessToken: string
 ): Promise<AuthenticatedUser | null> => {
   try {
-    console.log('[AUTH] getUser → checking access token');
-
+    // درخواست اطلاعات کاربر
     const res = await fetch(`${API_URL}/auth/profile`, {
       headers: {
         Cookie: `accessToken=${accessToken}`,
@@ -27,30 +27,26 @@ const getUser = async (
       cache: 'no-store',
     });
 
-    console.log('[AUTH] getUser → status:', res.status);
-
+    // اگر توکن معتبر نبود
     if (!res.ok) {
-      console.log('[AUTH] getUser → access token invalid');
-
       return null;
     }
 
+    // دریافت اطلاعات کاربر
     const data = await res.json();
 
-    console.log('[AUTH] getUser → success');
-
+    // برگرداندن کاربر
     return data.user ?? null;
-  } catch (error) {
-    console.error('[AUTH] getUser → error:', error);
-
+  } catch {
+    // خطای درخواست
     return null;
   }
 };
 
+// Access Token را با Refresh Token تمدید می‌کند
 const refresh = async (refreshToken: string): Promise<Tokens | null> => {
   try {
-    console.log('[AUTH] refresh → starting refresh');
-
+    // ارسال Refresh Token به Backend
     const res = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: {
@@ -59,125 +55,93 @@ const refresh = async (refreshToken: string): Promise<Tokens | null> => {
       cache: 'no-store',
     });
 
-    console.log('[AUTH] refresh → status:', res.status);
-
+    // اگر Refresh موفق نبود
     if (!res.ok) {
-      console.log('[AUTH] refresh → refresh failed');
-
       return null;
     }
 
+    // دریافت Cookieهای جدید
     const cookies = res.headers.getSetCookie();
 
-    console.log('[AUTH] refresh → set-cookie count:', cookies.length);
-
+    // استخراج مقدار یک Cookie
     const pick = (name: string) =>
       cookies
         .find((cookie) => cookie.startsWith(`${name}=`))
         ?.split(';')[0]
         .slice(name.length + 1);
 
+    // دریافت Access Token جدید
     const accessToken = pick('accessToken');
+
+    // دریافت Refresh Token جدید
     const newRefreshToken = pick('refreshToken');
 
-    console.log('[AUTH] refresh → access token:', Boolean(accessToken));
-
-    console.log('[AUTH] refresh → refresh token:', Boolean(newRefreshToken));
-
+    // اگر یکی از توکن‌ها وجود نداشت
     if (!accessToken || !newRefreshToken) {
-      console.log('[AUTH] refresh → tokens missing');
-
       return null;
     }
 
-    console.log('[AUTH] refresh → success');
-
+    // برگرداندن توکن‌های جدید
     return {
       accessToken,
       refreshToken: newRefreshToken,
     };
-  } catch (error) {
-    console.error('[AUTH] refresh → error:', error);
-
+  } catch {
+    // خطای Refresh
     return null;
   }
 };
 
+// بررسی احراز هویت درخواست
 export async function proxyAuth(
   request: NextRequest
 ): Promise<ProxyAuthResult> {
+  // دریافت توکن‌ها از Cookie
   const accessToken = request.cookies.get('accessToken')?.value;
-
   const refreshToken = request.cookies.get('refreshToken')?.value;
 
-  console.log('================ AUTH CHECK ================');
-
-  console.log('[AUTH] path:', request.nextUrl.pathname);
-
-  console.log('[AUTH] access token exists:', Boolean(accessToken));
-
-  console.log('[AUTH] refresh token exists:', Boolean(refreshToken));
-
-  // Access Token
+  // بررسی Access Token
   const user = accessToken ? await getUser(accessToken) : null;
 
+  // اگر Access Token معتبر بود
   if (user) {
-    console.log('[AUTH] RESULT → access token valid');
-
-    console.log('=============================================');
-
     return {
       user,
       tokens: null,
     };
   }
 
-  console.log('[AUTH] access token invalid or missing');
-
-  // Refresh Token وجود ندارد
+  // اگر Refresh Token وجود نداشت
   if (!refreshToken) {
-    console.log('[AUTH] RESULT → no refresh token');
-
-    console.log('=============================================');
-
     return {
       user: null,
       tokens: null,
     };
   }
 
-  // Refresh
+  // دریافت توکن‌های جدید
   const tokens = await refresh(refreshToken);
 
+  // اگر Refresh ناموفق بود
   if (!tokens) {
-    console.log('[AUTH] RESULT → refresh failed');
-
-    console.log('=============================================');
-
     return {
       user: null,
       tokens: null,
     };
   }
 
-  // Access Token جدید
+  // بررسی Access Token جدید
   const newUser = await getUser(tokens.accessToken);
 
+  // اگر توکن جدید معتبر بود
   if (newUser) {
-    console.log('[AUTH] RESULT → refresh successful');
-
-    console.log('=============================================');
-
     return {
       user: newUser,
       tokens,
     };
   }
 
-  console.log('[AUTH] RESULT → new access token rejected');
-
-  console.log('=============================================');
-
+  // اگر توکن جدید معتبر نبود
   return {
     user: null,
     tokens,

@@ -32,6 +32,7 @@
     "react-hook-form": "^7.89.0",
     "react-hot-toast": "^2.6.1",
     "react-loader-spinner": "^8.0.2",
+    "react-tag-input-component": "^2.0.2",
     "swagger-ui-react": "^5.33.0",
     "zod": "^4.6.5"
   },

@@ -28,6 +28,7 @@ const ProductsAddPage = (): ReactElement => {
     reset,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
   });
@@ -57,6 +58,7 @@ const ProductsAddPage = (): ReactElement => {
         onSubmit={handleSubmit(handleSubmitValue)}
         errors={errors}
         isPending={isPending}
+        control={control}
       />
     </div>
   );

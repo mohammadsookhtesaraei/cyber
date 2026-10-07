@@ -17,7 +17,6 @@ export async function POST(req: Request) {
     await connectDb();
 
     const cookieStore = await cookies();
-
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
     if (!refreshToken) {
@@ -31,7 +30,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // بررسی JWT رفرش توکن
     const payload = verifyRefreshToken(refreshToken);
 
     if (!payload) {
@@ -45,7 +43,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // پیدا کردن کاربر
+    const refreshTokenHash = hashRefreshToken(refreshToken);
+
     const user = await User.findById(payload.userId);
 
     if (!user) {
@@ -58,9 +57,6 @@ export async function POST(req: Request) {
         }
       );
     }
-
-    // پیدا کردن Session مربوط به Refresh Token
-    const refreshTokenHash = hashRefreshToken(refreshToken);
 
     const session = await Session.findOne({
       userId: user._id,
@@ -78,7 +74,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // بررسی انقضای Session
     if (new Date() > session.expiresAt) {
       await Session.deleteOne({
         _id: session._id,
@@ -102,10 +97,8 @@ export async function POST(req: Request) {
     const ipAddress =
       forwardedFor?.split(',')[0]?.trim() || session.ipAddress || undefined;
 
-    // ساخت Access Token جدید
     const newAccessToken = generateAccessToken(user._id.toString(), user.role);
 
-    // ساخت Refresh Token جدید
     const newRefreshToken = generateRefreshToken(
       user._id.toString(),
       user.role
@@ -113,34 +106,37 @@ export async function POST(req: Request) {
 
     const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
 
-    /*
-     * Session قبلی را فعلاً نگه می‌داریم
-     * تا درخواست‌های همزمان بتوانند
-     * در یک بازه کوتاه از آن استفاده کنند.
-     */
-    await Session.updateOne(
+    const updatedSession = await Session.findOneAndUpdate(
       {
         _id: session._id,
+        refreshTokenHash,
       },
       {
-        expiresAt: new Date(Date.now() + 30 * 1000),
+        refreshTokenHash: newRefreshTokenHash,
+        userAgent,
+        ipAddress,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+      {
+        new: true,
       }
     );
 
-    // Session جدید
-    await Session.create({
-      userId: user._id,
-      refreshTokenHash: newRefreshTokenHash,
-      userAgent,
-      ipAddress,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    });
+    if (!updatedSession) {
+      return NextResponse.json(
+        {
+          message: 'Refresh token already used',
+        },
+        {
+          status: 401,
+        }
+      );
+    }
 
     const response = NextResponse.json({
       message: 'Tokens refreshed successfully',
     });
 
-    // Access Token جدید
     response.cookies.set('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -149,7 +145,6 @@ export async function POST(req: Request) {
       maxAge: 15 * 60,
     });
 
-    // Refresh Token جدید
     response.cookies.set('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

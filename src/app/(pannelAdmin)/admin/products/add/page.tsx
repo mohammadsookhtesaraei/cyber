@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import axios from 'axios';
 
-import FormCategory from '../components/FormProducts';
+import FormProduct from '../components/FormProducts';
 import toast from 'react-hot-toast';
 import { RotatingLines } from 'react-loader-spinner';
 
@@ -99,7 +99,7 @@ const ProductsAddPage = (): ReactElement => {
 
   return (
     <div className="px-4">
-      <FormCategory
+      <FormProduct
         register={register}
         onSubmit={handleSubmit(handleSubmitValue)}
         errors={errors}

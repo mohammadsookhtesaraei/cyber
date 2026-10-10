@@ -9,7 +9,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 
 import CouponForm from '../components/CouponForm';
+import toast from 'react-hot-toast';
 import { RotatingLines } from 'react-loader-spinner';
+import DatePicker from 'react-multi-date-picker';
 
 import { useCreateCoupon } from '@/hook/useCoupon';
 import { useGetAllProducts } from '@/hook/useProducts';
@@ -28,20 +30,44 @@ const AddCoupons = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
     defaultValues: {
       amount: 0,
       code: '',
       expireDate: new Date(),
-      type: 'percentage',
+      type: 'percent',
       usageLimit: 0,
-      productIds: [''],
+      productIds: [],
       isActive: true,
     },
   });
 
-  const formHandleSubmit = async (values: CouponFormValues) => {};
+  const formHandleSubmit = async (values: CouponFormValues) => {
+    const payload = {
+      code: values.code,
+      type: values.type,
+      amount: values.amount,
+      expireDate: values.expireDate.toISOString(),
+      isActive: values.isActive,
+      usageLimit: values.usageLimit,
+      productIds: values.productIds,
+    };
+
+    console.log(values);
+    try {
+      const { message } = await mutateAsync(payload);
+      toast.success(message);
+      router.push('/admin/coupons');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error?.response?.data?.message);
+      } else {
+        toast.error('خطاب سمت سرور بعدا تلاش کنید');
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -69,6 +95,7 @@ const AddCoupons = () => {
         errors={errors}
         onSubmit={handleSubmit(formHandleSubmit)}
         products={products}
+        control={control}
       />
     </div>
   );

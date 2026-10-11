@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 
+import { useQueryClient } from '@tanstack/react-query';
+
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +13,6 @@ import axios from 'axios';
 import CouponForm from '../components/CouponForm';
 import toast from 'react-hot-toast';
 import { RotatingLines } from 'react-loader-spinner';
-import DatePicker from 'react-multi-date-picker';
 
 import { useCreateCoupon } from '@/hook/useCoupon';
 import { useGetAllProducts } from '@/hook/useProducts';
@@ -20,6 +21,7 @@ import { CouponFormValues, couponSchema } from '@/schemas/coupon-schema';
 
 const AddCoupons = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useCreateCoupon();
   const { data, isPending: loading } = useGetAllProducts();
@@ -29,8 +31,8 @@ const AddCoupons = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     control,
+    reset,
   } = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
     defaultValues: {
@@ -55,10 +57,13 @@ const AddCoupons = () => {
       productIds: values.productIds,
     };
 
-    console.log(values);
     try {
       const { message } = await mutateAsync(payload);
       toast.success(message);
+      reset();
+      queryClient.invalidateQueries({
+        queryKey: ['get-allcoupons'],
+      });
       router.push('/admin/coupons');
     } catch (error) {
       if (axios.isAxiosError(error)) {

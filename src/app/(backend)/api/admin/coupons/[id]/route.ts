@@ -14,6 +14,62 @@ interface RouteContext {
   }>;
 }
 
+export async function GET(request: NextRequest, { params }: RouteContext) {
+  try {
+    await connectDb();
+
+    const accessToken = request.cookies.get('accessToken')?.value;
+
+    const authorization = authorizeRole(accessToken, ['ADMIN']);
+
+    if (!authorization.authorized) {
+      return authorization.response;
+    }
+
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        {
+          message: 'شناسه کد تخفیف نامعتبر است',
+        },
+        { status: 400 }
+      );
+    }
+
+    const coupon = await Coupon.findById(id).populate({
+      path: 'productIds',
+      select: 'title price',
+    });
+
+    if (!coupon) {
+      return NextResponse.json(
+        {
+          message: 'کد تخفیف موردنظر پیدا نشد',
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message: 'اطلاعات کد تخفیف با موفقیت دریافت شد',
+        coupon,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('GET coupon error:', error);
+
+    return NextResponse.json(
+      {
+        message: 'خطایی در پردازش درخواست رخ داد',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
     await connectDb();

@@ -28,7 +28,7 @@ const ProductsAddPage = (): ReactElement => {
   const { data, isPending: loadingData } = useCategoriesByAdmin();
 
   const { categories } = data || {};
-  console.log(categories);
+
   const { mutateAsync, isPending } = useCreateProduct();
   const {
     register,
@@ -61,7 +61,7 @@ const ProductsAddPage = (): ReactElement => {
       discount: Number(values.discount),
       countInStock: Number(values.countInStock),
     };
-    console.log(product);
+
     try {
       const { message } = await mutateAsync(product);
       toast.success(message);

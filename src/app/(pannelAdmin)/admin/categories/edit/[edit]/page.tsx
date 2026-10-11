@@ -72,7 +72,6 @@ const EditCategory = (): ReactElement => {
       const { message } = await mutateAsync(state);
 
       toast.success(message);
-      reset();
 
       querClient.invalidateQueries({
         queryKey: ['get-categoryAdmin'],

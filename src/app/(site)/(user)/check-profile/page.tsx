@@ -54,7 +54,6 @@ const CheckProfile = (): ReactElement => {
       toast.success(message, { duration: 4000 });
       router.push('/');
     } catch (error) {
-      console.log(error);
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message);
       } else {

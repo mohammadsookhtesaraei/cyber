@@ -29,7 +29,6 @@ const EditId = () => {
   const queryClient = useQueryClient();
   const { data, isPending: isGettingProduct } = useGetProductById(edit);
   const { product } = data || {};
-  console.log(product);
 
   const { mutateAsync, isPending: isUpdating } = useUpdateProduct();
   const { data: categoriesData, isPending: loadingData } =

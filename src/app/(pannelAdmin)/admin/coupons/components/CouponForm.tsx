@@ -106,7 +106,7 @@ const CouponForm = ({
                   options={products}
                   getOptionLabel={(option) => option.title}
                   getOptionValue={(option) => option._id}
-                  value={products.filter((product) =>
+                  value={products?.filter((product) =>
                     field.value?.includes(product._id)
                   )}
                   onChange={(selected) =>

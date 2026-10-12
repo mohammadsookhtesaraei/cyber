@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { ReactElement, useEffect, useState } from 'react';
 
@@ -24,7 +25,7 @@ const Header = (): ReactElement => {
 
   useEffect(() => {
     const handleScroll = (): void => {
-      setIscrolled(window.scrollY > 20);
+      setIscrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -40,8 +41,10 @@ const Header = (): ReactElement => {
 
       <header
         className={clsx(
-          'fixed top-0 z-50 w-full py-4 transition-all duration-300',
-          isScrolled ? 'glass border-b border-b-white/30' : ''
+          'py-4 transition-all duration-300',
+          isScrolled
+            ? 'glass fixed top-0 z-50 w-full border-b border-b-white/30'
+            : ''
         )}
       >
         <nav className="contentWrapper flex h-14 items-center justify-between gap-8 px-4 md:justify-normal">
@@ -57,15 +60,21 @@ const Header = (): ReactElement => {
           {/* action */}
           <div className="hidden items-center gap-6 md:flex">
             <div className="flex size-6 shrink-0 items-center justify-center">
-              <Favorites className="size-full" />
+              <Link className="size-full" href="/auth">
+                <Favorites className="size-full" />
+              </Link>
             </div>
 
             <div className="flex size-6 shrink-0 items-center justify-center">
-              <Cart1 className="size-full" />
+              <Link className="size-full" href="/cart">
+                <Cart1 className="size-full" />
+              </Link>
             </div>
 
-            <div className="flex size-6 shrink-0 items-center justify-center">
-              <User className="relative -top-0.5" />
+            <div className="flex size-5 shrink-0 items-center justify-center">
+              <Link className="size-full" href="/auth">
+                <User className="relative -top-1 size-full" />
+              </Link>
             </div>
           </div>
           {/* menulist */}
@@ -105,16 +114,7 @@ const Header = (): ReactElement => {
         </nav>
       </header>
       {/* sub-header */}
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 88 }}
-        transition={{
-          duration: 0.6,
-          // ease: [0.22, 1, 0.36, 1],
-        }}
-
-        className="bg-primary relative z-40 hidden px-4 py-2 md:block md:px-2"
-      >
+      <div className="bg-primary relative z-40 hidden px-4 py-2 md:block md:px-2">
         <div className="contentWrapper flex h-8 items-center justify-between gap-8 md:justify-normal">
           <ul className="flex w-full justify-between">
             {subNavData.map((item) => {
@@ -133,7 +133,7 @@ const Header = (): ReactElement => {
             })}
           </ul>
         </div>
-      </motion.div>
+      </div>
 
       {/* mobile-menu*/}
 

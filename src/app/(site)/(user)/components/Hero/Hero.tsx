@@ -11,12 +11,12 @@ import Iphone from '@/assets/images/18pro.webp';
 
 const Hero = (): ReactElement => {
   return (
-    <section className="relative overflow-hidden pt-23 pb-0">
-      <div className="absolute inset-0 top-20 bg-linear-to-r from-[#211C24] to-[#211C24]"></div>
+    <section className="relative bg-red-300 pt-23 pb-0">
+      <div className="absolute inset-0 bg-linear-to-r from-[#211C24] to-[#211C24]"></div>
       {/* container */}
       <div className="contentWrapper relative">
         {/* content */}
-        <div className="grid h-200 grid-cols-1 items-center justify-items-center pt-10 md:h-auto md:grid-cols-2 md:pt-0">
+        <div className="grid grid-cols-1 items-center justify-items-center pt-22 md:grid-cols-2 md:pt-0">
           <div className="order-2 text-red-600 md:order-1 md:justify-self-start">
             <Image quality={100} src={Iphone} alt="iphone18" loading="eager" />
           </div>

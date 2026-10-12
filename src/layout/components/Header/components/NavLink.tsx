@@ -1,9 +1,34 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { ReactNode } from 'react';
+
 import clsx from 'clsx';
 
-const NavLink = () => {
-  return <div>NavLink</div>;
+type TextStyle = 'normal' | 'active';
+
+const textStyle: Record<TextStyle, string> = {
+  normal: 'text-black',
+  active: 'text-black/30',
+};
+
+type NavLinkProps = {
+  href: string;
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+};
+const NavLink = ({ href, children, className, onClick }: NavLinkProps) => {
+  const pathName = usePathname();
+  const isActive = pathName === href;
+  return (
+    <Link
+      onClick={onClick}
+      className={clsx(className, isActive ? 'text-black' : 'text-black/30')}
+      href={href}
+    >
+      {children}
+    </Link>
+  );
 };
 export default NavLink;

@@ -1,5 +1,6 @@
-import * as React from "react";
-import type { SVGProps } from "react";
+import * as React from 'react';
+import type { SVGProps } from 'react';
+
 const SvgUser = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -10,7 +11,7 @@ const SvgUser = (props: SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      stroke="#191919"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}

@@ -1,14 +1,12 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import mongoose from "mongoose";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import Session from "@/model/Session";
+import mongoose from 'mongoose';
 
-import {
-  verifyAccessToken,
-  hashRefreshToken,
-} from "@/utils/auth";
+import { hashRefreshToken, verifyAccessToken } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
+
+import Session from '@/model/Session';
 
 interface RouteContext {
   params: Promise<{
@@ -16,9 +14,7 @@ interface RouteContext {
   }>;
 }
 
-export async function DELETE(
-  context: RouteContext
-) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     // Connect to database
     await connectDb();
@@ -29,62 +25,45 @@ export async function DELETE(
     // Validate session id
     if (!id) {
       return NextResponse.json(
-        {
-          message: "Session id is required",
-        },
-        {
-          status: 400,
-        }
+        { message: 'Session id is required' },
+        { status: 400 }
       );
     }
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        {
-          message: "Invalid session id",
-        },
-        {
-          status: 400,
-        }
+        { message: 'Invalid session id' },
+        { status: 400 }
       );
     }
 
-    // Get access token
+    // Get cookies
     const cookieStore = await cookies();
 
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get('accessToken')?.value;
 
     // Check access token
     if (!accessToken) {
       return NextResponse.json(
-        {
-          message: "Access token is required",
-        },
-        {
-          status: 401,
-        }
+        { message: 'Access token is required' },
+        { status: 401 }
       );
     }
 
     // Verify access token
-    const payload =
-      verifyAccessToken(accessToken);
+    const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       return NextResponse.json(
         {
-          message:
-            "Access token is invalid or expired",
+          message: 'Access token is invalid or expired',
         },
-        {
-          status: 401,
-        }
+        { status: 401 }
       );
     }
 
-    // Find session
+    // Find session belonging to the authenticated user
     const session = await Session.findOne({
       _id: id,
       userId: payload.userId,
@@ -93,36 +72,24 @@ export async function DELETE(
     // Session not found
     if (!session) {
       return NextResponse.json(
-        {
-          message: "Session not found",
-        },
-        {
-          status: 404,
-        }
+        { message: 'Session not found' },
+        { status: 404 }
       );
     }
 
     // Get current refresh token
-    const refreshToken =
-      cookieStore.get("refreshToken")?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    // Check if this is the current session
+    // Prevent deleting the current session
     if (refreshToken) {
-      const refreshTokenHash =
-        hashRefreshToken(refreshToken);
+      const currentRefreshTokenHash = hashRefreshToken(refreshToken);
 
-      if (
-        session.refreshTokenHash ===
-        refreshTokenHash
-      ) {
+      if (session.refreshTokenHash === currentRefreshTokenHash) {
         return NextResponse.json(
           {
-            message:
-              "برای خروج از دستگاه فعلی از logout استفاده کنید",
+            message: 'برای خروج از دستگاه فعلی از logout استفاده کنید',
           },
-          {
-            status: 400,
-          }
+          { status: 400 }
         );
       }
     }
@@ -134,18 +101,14 @@ export async function DELETE(
     });
 
     return NextResponse.json({
-      message: "Session deleted successfully",
+      message: 'Session deleted successfully',
     });
   } catch (error) {
-    console.log(error);
+    console.error('DELETE session error:', error);
 
     return NextResponse.json(
-      {
-        message: "Something went wrong",
-      },
-      {
-        status: 500,
-      }
+      { message: 'Something went wrong' },
+      { status: 500 }
     );
   }
 }

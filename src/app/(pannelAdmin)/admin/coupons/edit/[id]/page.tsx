@@ -22,7 +22,7 @@ import { CouponFormValues, couponSchema } from '@/schemas/coupon-schema';
 
 import CouponForm from '@/app/(pannelAdmin)/admin/coupons/components/CouponForm';
 
-const EditId = () => {
+const EditId = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();

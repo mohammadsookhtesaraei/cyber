@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
+import { verifyAccessToken } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
 
-import { verifyAccessToken } from "@/utils/auth";
+import User from '@/model/User';
 
 export async function POST(req: Request) {
   try {
@@ -14,14 +14,13 @@ export async function POST(req: Request) {
     // Get access token from HttpOnly cookie
     const cookieStore = await cookies();
 
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get('accessToken')?.value;
 
     // Check access token
     if (!accessToken) {
       return NextResponse.json(
         {
-          message: "Access token is required",
+          message: 'Access token is required',
         },
         {
           status: 401,
@@ -30,14 +29,12 @@ export async function POST(req: Request) {
     }
 
     // Verify access token
-    const payload =
-      verifyAccessToken(accessToken);
+    const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       return NextResponse.json(
         {
-          message:
-            "Access token is invalid or expired",
+          message: 'Access token is invalid or expired',
         },
         {
           status: 401,
@@ -54,7 +51,7 @@ export async function POST(req: Request) {
     if (!name || !email) {
       return NextResponse.json(
         {
-          message: "نام و ایمیل الزامی است",
+          message: 'نام و ایمیل الزامی است',
         },
         {
           status: 400,
@@ -63,10 +60,10 @@ export async function POST(req: Request) {
     }
 
     // Validate name
-    if (typeof name !== "string" || name.trim().length < 2) {
+    if (typeof name !== 'string' || name.trim().length < 2) {
       return NextResponse.json(
         {
-          message: "نام باید حداقل ۲ کاراکتر باشد",
+          message: 'نام باید حداقل ۲ کاراکتر باشد',
         },
         {
           status: 400,
@@ -75,10 +72,10 @@ export async function POST(req: Request) {
     }
 
     // Validate email
-    if (typeof email !== "string") {
+    if (typeof email !== 'string') {
       return NextResponse.json(
         {
-          message: "ایمیل نامعتبر است",
+          message: 'ایمیل نامعتبر است',
         },
         {
           status: 400,
@@ -86,13 +83,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
         {
-          message: "فرمت ایمیل صحیح نیست",
+          message: 'فرمت ایمیل صحیح نیست',
         },
         {
           status: 400,
@@ -101,14 +97,12 @@ export async function POST(req: Request) {
     }
 
     // Find user
-    const user = await User.findById(
-      payload.userId
-    );
+    const user = await User.findById(payload.userId);
 
     if (!user) {
       return NextResponse.json(
         {
-          message: "کاربر پیدا نشد",
+          message: 'کاربر پیدا نشد',
         },
         {
           status: 404,
@@ -120,8 +114,7 @@ export async function POST(req: Request) {
     if (!user.isVerifiedPhoneNumber) {
       return NextResponse.json(
         {
-          message:
-            "ابتدا شماره موبایل خود را تایید کنید",
+          message: 'ابتدا شماره موبایل خود را تایید کنید',
         },
         {
           status: 403,
@@ -139,15 +132,14 @@ export async function POST(req: Request) {
     } catch (error: unknown) {
       // Duplicate email
       if (
-        typeof error === "object" &&
+        typeof error === 'object' &&
         error !== null &&
-        "code" in error &&
+        'code' in error &&
         (error as { code?: number }).code === 11000
       ) {
         return NextResponse.json(
           {
-            message:
-              "این ایمیل قبلاً توسط کاربر دیگری استفاده شده است",
+            message: 'این ایمیل قبلاً توسط کاربر دیگری استفاده شده است',
           },
           {
             status: 409,
@@ -159,12 +151,11 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
-      message: "پروفایل با موفقیت تکمیل شد",
+      message: 'پروفایل با موفقیت تکمیل شد',
       userId: user._id,
       name: user.name,
       email: user.email,
-      isVerifiedPhoneNumber:
-        user.isVerifiedPhoneNumber,
+      isVerifiedPhoneNumber: user.isVerifiedPhoneNumber,
       isActive: user.isActive,
     });
   } catch (error) {
@@ -172,7 +163,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

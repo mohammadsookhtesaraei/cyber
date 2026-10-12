@@ -1,14 +1,11 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
-import Session from "@/model/Session";
+import { hashRefreshToken, verifyAccessToken } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
 
-import {
-  verifyAccessToken,
-  hashRefreshToken,
-} from "@/utils/auth";
+import Session from '@/model/Session';
+import User from '@/model/User';
 
 export async function GET() {
   try {
@@ -18,14 +15,13 @@ export async function GET() {
     // Get access token from HttpOnly cookie
     const cookieStore = await cookies();
 
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get('accessToken')?.value;
 
     // Check access token
     if (!accessToken) {
       return NextResponse.json(
         {
-          message: "Access token is required",
+          message: 'Access token is required',
         },
         {
           status: 401,
@@ -34,14 +30,12 @@ export async function GET() {
     }
 
     // Verify access token
-    const payload =
-      verifyAccessToken(accessToken);
+    const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       return NextResponse.json(
         {
-          message:
-            "Access token is invalid or expired",
+          message: 'Access token is invalid or expired',
         },
         {
           status: 401,
@@ -55,7 +49,7 @@ export async function GET() {
     if (!user) {
       return NextResponse.json(
         {
-          message: "User not found",
+          message: 'User not found',
         },
         {
           status: 404,
@@ -64,25 +58,21 @@ export async function GET() {
     }
 
     // Get current refresh token
-    const refreshToken =
-      cookieStore.get("refreshToken")?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     let currentSessionId: string | null = null;
 
     // Find current session
     if (refreshToken) {
-      const refreshTokenHash =
-        hashRefreshToken(refreshToken);
+      const refreshTokenHash = hashRefreshToken(refreshToken);
 
-      const currentSession =
-        await Session.findOne({
-          userId: user._id,
-          refreshTokenHash,
-        }).select("_id");
+      const currentSession = await Session.findOne({
+        userId: user._id,
+        refreshTokenHash,
+      }).select('_id');
 
       if (currentSession) {
-        currentSessionId =
-          currentSession._id.toString();
+        currentSessionId = currentSession._id.toString();
       }
     }
 
@@ -101,30 +91,24 @@ export async function GET() {
         $gt: new Date(),
       },
     })
-      .select(
-        "_id userAgent ipAddress expiresAt createdAt updatedAt"
-      )
+      .select('_id userAgent ipAddress expiresAt createdAt updatedAt')
       .sort({
         createdAt: -1,
       });
 
     // Format sessions
-    const formattedSessions = sessions.map(
-      (session) => ({
-        id: session._id,
-        userAgent: session.userAgent,
-        ipAddress: session.ipAddress,
-        expiresAt: session.expiresAt,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-        isCurrent:
-          session._id.toString() ===
-          currentSessionId,
-      })
-    );
+    const formattedSessions = sessions.map((session) => ({
+      id: session._id,
+      userAgent: session.userAgent,
+      ipAddress: session.ipAddress,
+      expiresAt: session.expiresAt,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+      isCurrent: session._id.toString() === currentSessionId,
+    }));
 
     return NextResponse.json({
-      message: "Sessions retrieved successfully",
+      message: 'Sessions retrieved successfully',
       sessions: formattedSessions,
     });
   } catch (error) {
@@ -132,7 +116,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

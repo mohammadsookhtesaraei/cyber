@@ -44,7 +44,7 @@ const Header = (): ReactElement => {
           isScrolled ? 'glass border-b border-b-white/30' : ''
         )}
       >
-        <nav className="mx-auto flex h-14 max-w-275 items-center justify-between gap-8 px-4 md:justify-normal md:px-0">
+        <nav className="contentWrapper flex h-14 items-center justify-between gap-8 px-4 md:justify-normal">
           {/*menu  */}
           <div className="md:hidden">
             <button
@@ -106,16 +106,16 @@ const Header = (): ReactElement => {
       </header>
       {/* sub-header */}
       <motion.div
-        initial={{ opacity: 0, y: -100 }}
+        initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 88 }}
         transition={{
           duration: 0.6,
           // ease: [0.22, 1, 0.36, 1],
         }}
 
-        className="bg-primary hidden px-4 py-2 md:block md:px-0"
+        className="bg-primary relative z-40 hidden px-4 py-2 md:block md:px-2"
       >
-        <div className="mx-auto flex h-8 max-w-275 items-center justify-between gap-8 px-4 md:justify-normal md:px-0">
+        <div className="contentWrapper flex h-8 items-center justify-between gap-8 md:justify-normal">
           <ul className="flex w-full justify-between">
             {subNavData.map((item) => {
               const Icon = item.icon;
@@ -136,55 +136,133 @@ const Header = (): ReactElement => {
       </motion.div>
 
       {/* mobile-menu*/}
+
       <AnimatePresence>
         {isMobileOpenMenu && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 md:hidden"
           >
+            {/* Backdrop */}
             <div
-              className="bg-dark-900/80 absolute inset-0 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/70 backdrop-blur-md"
               onClick={() => setIsMobileOpenMenu(false)}
+            />
+
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{
+                duration: 0.28,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-20 right-4 left-4 overflow-hidden rounded-[28px] border border-white/10 bg-[#18181f] p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.8)]"
             >
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="glass absolute top-16 right-4 left-4 rounded-2xl p-6 shadow-2xl"
-              >
-                {/* link-menu */}
-                <div className="flex flex-col gap-3 md:flex lg:gap-6 xl:gap-13">
-                  {navData.map((item) => (
-                    <NavLink
-                      className="text-[16px] whitespace-nowrap"
+              {/* Header */}
+              <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
+                <div>
+                  <p className="text-xs font-medium tracking-[0.2em] text-white/40">
+                    EXPLORE
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-semibold text-white">
+                    منوی فروشگاه
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMobileOpenMenu(false)}
+                  aria-label="بستن منو"
+                  className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-2xl text-white/70 transition-all duration-200 hover:rotate-90 hover:bg-white/10 hover:text-white"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav aria-label="منوی اصلی">
+                <div className="flex flex-col gap-2">
+                  {navData.map((item, index) => (
+                    <motion.div
                       key={item.id}
-                      href={item.href}
-                      onClick={() => setIsMobileOpenMenu(false)}
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: 0.25,
+                        delay: index * 0.045,
+                      }}
                     >
-                      {item.text}
-                    </NavLink>
+                      <NavLink
+                        href={item.href}
+                        onClick={() => setIsMobileOpenMenu(false)}
+                        className="group flex items-center justify-between rounded-2xl border border-transparent px-4 py-3.5 text-[15px] font-medium text-white/70 transition-all duration-200 hover:border-white/10 hover:bg-white/[0.06] hover:text-white"
+                      >
+                        <span>{item.text}</span>
+
+                        <span
+                          aria-hidden="true"
+                          className="translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                        >
+                          ←
+                        </span>
+                      </NavLink>
+                    </motion.div>
                   ))}
                 </div>
+              </nav>
 
-                {/* action */}
-                <div className="mt-6 flex items-center justify-center gap-6 border-t border-t-black/30 py-2">
-                  <div className="flex size-6 shrink-0 items-center justify-center">
-                    <Favorites className="size-full" />
-                  </div>
+              {/* Divider */}
+              <div className="my-5 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-                  <div className="flex size-6 shrink-0 items-center justify-center">
-                    <Cart1 className="size-full" />
-                  </div>
+              {/* Quick Actions */}
+              <div className="grid grid-cols-3 gap-3">
+                {/* Favorites */}
+                <button
+                  type="button"
+                  aria-label="علاقه‌مندی‌ها"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#202027] py-4 text-white/65 transition-all duration-200 hover:border-white/20 hover:bg-[#292932] hover:text-white"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-white/[0.06]">
+                    <Favorites className="size-5" />
+                  </span>
 
-                  <div className="flex size-6 shrink-0 items-center justify-center">
-                    <User className="relative -top-0.5" />
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+                  <span className="text-center text-[11px]">علاقه‌مندی‌ها</span>
+                </button>
+
+                {/* Cart */}
+                <button
+                  type="button"
+                  aria-label="سبد خرید"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#202027] py-4 text-white/65 transition-all duration-200 hover:border-white/20 hover:bg-[#292932] hover:text-white"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-white/[0.06]">
+                    <Cart1 className="size-5" />
+                  </span>
+
+                  <span className="text-center text-[11px]">سبد خرید</span>
+                </button>
+
+                {/* User */}
+                <button
+                  type="button"
+                  aria-label="حساب کاربری"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#202027] py-4 text-white/65 transition-all duration-200 hover:border-white/20 hover:bg-[#292932] hover:text-white"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-white/[0.06]">
+                    <User className="size-5" />
+                  </span>
+
+                  <span className="text-center text-[11px]">حساب کاربری</span>
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

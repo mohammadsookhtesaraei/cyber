@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
-import { verifyAccessToken } from "@/utils/auth";
+import { verifyAccessToken } from '@/utils/auth';
+import connectDb from '@/utils/connectDb';
+
+import User from '@/model/User';
 
 export async function GET() {
   try {
@@ -13,14 +14,13 @@ export async function GET() {
     // Get access token from HttpOnly cookie
     const cookieStore = await cookies();
 
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get('accessToken')?.value;
 
     // Check access token
     if (!accessToken) {
       return NextResponse.json(
         {
-          message: "Access token is required",
+          message: 'Access token is required',
         },
         {
           status: 401,
@@ -29,14 +29,12 @@ export async function GET() {
     }
 
     // Verify access token
-    const payload =
-      verifyAccessToken(accessToken);
+    const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       return NextResponse.json(
         {
-          message:
-            "Access token is invalid or expired",
+          message: 'Access token is invalid or expired',
         },
         {
           status: 401,
@@ -45,14 +43,12 @@ export async function GET() {
     }
 
     // Find user
-    const user = await User.findById(
-      payload.userId
-    ).select("-otp -resetLink");
+    const user = await User.findById(payload.userId).select('-otp -resetLink');
 
     if (!user) {
       return NextResponse.json(
         {
-          message: "User not found",
+          message: 'User not found',
         },
         {
           status: 404,
@@ -61,7 +57,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      message: "User authenticated successfully",
+      message: 'User authenticated successfully',
       user,
     });
   } catch (error) {
@@ -69,7 +65,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

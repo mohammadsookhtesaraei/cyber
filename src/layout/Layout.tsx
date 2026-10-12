@@ -1,12 +1,12 @@
-import { PropsWithChildren, ReactElement } from "react";
+import { PropsWithChildren, ReactElement } from 'react';
 
-import Header from "@/layout/components/Header/Header";
-import Footer from "@/layout/components/Footer/Footer";
+import Footer from '@/layout/components/Footer/Footer';
+import Header from '@/layout/components/Header/Header';
 
 type Props = PropsWithChildren;
 const Layout = ({ children }: Props): ReactElement => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

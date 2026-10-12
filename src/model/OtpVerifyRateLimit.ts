@@ -1,7 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IOtpVerifyRateLimit
-  extends Document {
+export interface IOtpVerifyRateLimit extends Document {
   phoneNumber: string;
 
   attemptCount: number;
@@ -13,38 +12,37 @@ export interface IOtpVerifyRateLimit
   updatedAt: Date;
 }
 
-const otpVerifyRateLimitSchema =
-  new Schema<IOtpVerifyRateLimit>(
-    {
-      // Phone number being verified
-      phoneNumber: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-      },
-
-      // Number of OTP verification attempts
-      attemptCount: {
-        type: Number,
-        default: 0,
-      },
-
-      // Start of the rate-limit window
-      windowStart: {
-        type: Date,
-        required: true,
-      },
+const otpVerifyRateLimitSchema = new Schema<IOtpVerifyRateLimit>(
+  {
+    // Phone number being verified
+    phoneNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
-    {
-      timestamps: true,
-    }
-  );
+
+    // Number of OTP verification attempts
+    attemptCount: {
+      type: Number,
+      default: 0,
+    },
+
+    // Start of the rate-limit window
+    windowStart: {
+      type: Date,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const OtpVerifyRateLimit =
   mongoose.models.OtpVerifyRateLimit ||
   mongoose.model<IOtpVerifyRateLimit>(
-    "OtpVerifyRateLimit",
+    'OtpVerifyRateLimit',
     otpVerifyRateLimitSchema
   );
 

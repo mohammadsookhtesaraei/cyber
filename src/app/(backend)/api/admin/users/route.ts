@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-import connectDb from "@/utils/connectDb";
-import User from "@/model/User";
+import { authorizeRole } from '@/utils/authorization';
+import connectDb from '@/utils/connectDb';
 
-import { authorizeRole } from "@/utils/authorization";
+import User from '@/model/User';
 
 export async function GET() {
   try {
@@ -14,30 +14,22 @@ export async function GET() {
     // Get access token
     const cookieStore = await cookies();
 
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get('accessToken')?.value;
 
     // Check authentication + authorization
-    const authorization = authorizeRole(
-      accessToken,
-      ["ADMIN"]
-    );
+    const authorization = authorizeRole(accessToken, ['ADMIN']);
 
     if (!authorization.authorized) {
       return authorization.response;
     }
 
     // Get users
-    const users = await User.find()
-      .select(
-        "-otp -resetLink"
-      )
-      .sort({
-        createdAt: -1,
-      });
+    const users = await User.find().select('-otp -resetLink').sort({
+      createdAt: -1,
+    });
 
     return NextResponse.json({
-      message: "Users retrieved successfully",
+      message: 'Users retrieved successfully',
       users,
     });
   } catch (error) {
@@ -45,7 +37,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        message: "Something went wrong",
+        message: 'Something went wrong',
       },
       {
         status: 500,

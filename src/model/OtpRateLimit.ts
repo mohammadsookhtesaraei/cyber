@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOtpRateLimit extends Document {
   phoneNumber: string;
@@ -40,9 +40,6 @@ const otpRateLimitSchema = new Schema<IOtpRateLimit>(
 
 const OtpRateLimit =
   mongoose.models.OtpRateLimit ||
-  mongoose.model<IOtpRateLimit>(
-    "OtpRateLimit",
-    otpRateLimitSchema
-  );
+  mongoose.model<IOtpRateLimit>('OtpRateLimit', otpRateLimitSchema);
 
 export default OtpRateLimit;

@@ -204,7 +204,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         message: 'خطایی در پردازش درخواست رخ داد',

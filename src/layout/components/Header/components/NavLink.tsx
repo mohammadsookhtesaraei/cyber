@@ -5,13 +5,6 @@ import { ReactNode } from 'react';
 
 import clsx from 'clsx';
 
-type TextStyle = 'normal' | 'active';
-
-const textStyle: Record<TextStyle, string> = {
-  normal: 'text-black',
-  active: 'text-black/30',
-};
-
 type NavLinkProps = {
   href: string;
   children: ReactNode;

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import "swagger-ui-react/swagger-ui.css";
+import SwaggerUI from 'swagger-ui-react';
 
-import SwaggerUI from "swagger-ui-react";
+import swaggerDocument from '@/lib/swagger';
 
-import swaggerDocument from "@/lib/swagger";
+import 'swagger-ui-react/swagger-ui.css';
 
 export default function SwaggerPage() {
   return (
     <div dir="ltr">
-        <SwaggerUI spec={swaggerDocument} />
+      <SwaggerUI spec={swaggerDocument} />
     </div>
   );
 }

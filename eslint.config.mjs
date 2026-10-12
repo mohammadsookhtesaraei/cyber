@@ -1,19 +1,14 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
-import prettierConfig from "eslint-config-prettier";
-import prettierPlugin from "eslint-plugin-prettier";
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
 
-  globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 
   {
     plugins: {
@@ -21,10 +16,10 @@ export default defineConfig([
     },
 
     rules: {
-      "prettier/prettier": "error",
+      'prettier/prettier': 'error',
 
       // "@typescript-eslint/explicit-function-return-type": "error",
-      "@typescript-eslint/explicit-member-accessibility": "error",
+      '@typescript-eslint/explicit-member-accessibility': 'error',
     },
   },
 

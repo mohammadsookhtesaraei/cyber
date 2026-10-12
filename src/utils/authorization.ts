@@ -1,11 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import {
-  AccessTokenPayload,
-  verifyAccessToken,
-} from "@/utils/auth";
+import { AccessTokenPayload, verifyAccessToken } from '@/utils/auth';
 
-export type UserRole = "USER" | "ADMIN";
+export type UserRole = 'USER' | 'ADMIN';
 
 export function authorizeRole(
   accessToken: string | undefined,
@@ -19,7 +16,7 @@ export function authorizeRole(
       authorized: false,
       response: NextResponse.json(
         {
-          message: "Access token is required",
+          message: 'Access token is required',
         },
         {
           status: 401,
@@ -29,16 +26,14 @@ export function authorizeRole(
   }
 
   // Verify access token
-  const payload =
-    verifyAccessToken(accessToken);
+  const payload = verifyAccessToken(accessToken);
 
   if (!payload) {
     return {
       authorized: false,
       response: NextResponse.json(
         {
-          message:
-            "Access token is invalid or expired",
+          message: 'Access token is invalid or expired',
         },
         {
           status: 401,
@@ -53,7 +48,7 @@ export function authorizeRole(
       authorized: false,
       response: NextResponse.json(
         {
-          message: "Access denied",
+          message: 'Access denied',
         },
         {
           status: 403,

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 // .env url database
 
@@ -8,20 +8,20 @@ export const connectDb = async () => {
   try {
     // اگر دیتابیس از قبل متصل هست، برگرد
     if (mongoose.connection.readyState === 1) {
-      console.log("Already connectDB🟢!");
+      console.log('Already connectDB🟢!');
       return;
     }
 
-    mongoose.set("strictQuery", false);
+    mongoose.set('strictQuery', false);
 
     await mongoose.connect(url);
 
-    console.log("mongoDB connect✅!");
+    console.log('mongoDB connect✅!');
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.message);
     } else {
-      console.log("unknown error from database!");
+      console.log('unknown error from database!');
     }
 
     throw error;

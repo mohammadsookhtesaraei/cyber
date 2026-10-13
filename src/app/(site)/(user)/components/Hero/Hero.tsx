@@ -14,10 +14,9 @@ const Hero = (): ReactElement => {
       <div className="contentWrapper relative">
         {/* content */}
         <div className="grid grid-cols-1 items-center justify-items-center pt-22 md:grid-cols-2 md:pt-0">
-          <div className="order-2 text-red-600 md:order-1 md:justify-self-start">
+          <div className="order-2">
             <Image quality={100} src={Iphone} alt="iphone18" loading="eager" />
           </div>
-
           <TitleCard />
         </div>
       </div>

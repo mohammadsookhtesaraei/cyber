@@ -45,18 +45,15 @@ const ProductGrid = (): ReactElement => {
               <h2 className="font-sans text-[34px] font-thin text-black md:text-6xl">
                 Macbook <span className="font-bold">Air</span>
               </h2>
-              <p
-                dir="ltr"
-                className="text-4 text-center font-sans font-medium text-[#909090] md:text-left md:text-[14px]"
-              >
-                The new 15‑inch MacBook Air makes room for more of what you love
-                with a spacious Liquid Retina display.
+              <p className="text-center text-sm font-medium text-[#909090] md:text-justify">
+                مک‌بوک ایر ۱۵ اینچی جدید، با نمایشگر بزرگ Liquid Retina، فضای
+                بیشتری برای هر آنچه دوست دارید فراهم می‌کند.
               </p>
               <Link
-                className="hover:text-primary active:text-primary w-full rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white active:bg-white md:w-fit md:self-end md:px-14"
+                className="hover:text-primary active:text-primary w-full rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white active:bg-white md:w-fit md:self-start md:px-14"
                 href="/product"
               >
-                Shop Now
+                مشاهده و خرید
               </Link>
             </div>
           </div>
@@ -69,12 +66,13 @@ const ProductGrid = (): ReactElement => {
           <RevealCard className="group order-2 w-full overflow-hidden bg-white md:order-1">
             <div className="flex h-full w-full flex-col items-center py-10 pr-4 pl-4 transition-transform duration-300 group-hover:scale-105 md:flex-row md:py-0 md:pr-12 md:pl-0">
               <div className="order-2 flex flex-col items-center gap-4 text-center md:order-0">
-                <h2 className="font-sans text-[34px] font-medium text-black md:text-6xl">
+                <h2 className="font-sans text-[34px] font-medium whitespace-nowrap text-black md:text-6xl">
                   Playstation 5
                 </h2>
-                <p dir="ltr" className="text-4 text-[#909090] md:text-[14px]">
-                  Incredibly powerful CPUs, GPUs, and an SSD with integrated I/O
-                  will redefine your PlayStation experience.
+                <p className="text-center text-sm font-medium text-[#909090] md:text-justify">
+                  پردازندهٔ مرکزی و گرافیکی فوق العاده قدرتمند، همراه با SSD و
+                  سیستم ورودی/خروجی یکپارچه، تجربهٔ پلی استیشن شما را دگرگون
+                  میکند.
                 </p>
               </div>
               <div className="hidden w-full justify-end justify-self-end md:flex">
@@ -115,11 +113,8 @@ const ProductGrid = (): ReactElement => {
                       AirPods <span className="font-bold">Max</span>
                     </span>
                   </h2>
-                  <p
-                    dir="ltr"
-                    className="font-sans text-[14px] font-medium text-[#909090]"
-                  >
-                    Computational audio. <br /> Listen, it&apos;s powerful
+                  <p className="text-center text-sm font-medium text-[#909090] md:text-right">
+                    صدای هوشمند
                   </p>
                 </div>
 
@@ -153,17 +148,15 @@ const ProductGrid = (): ReactElement => {
             <RevealCard className="group order-2 w-full overflow-hidden bg-[#353535] md:order-1 md:w-1/2">
               <div className="flex h-full w-full flex-col items-center gap-4 py-10 pr-4 pl-4 text-center transition-transform duration-300 group-hover:scale-105 md:flex-row md:py-0 md:pr-12 md:pl-0 md:text-left">
                 <div className="order-2 flex w-full flex-col gap-2 md:order-0 md:max-w-40">
-                  <h2 className="font-sans text-[29px] leading-tight font-thin text-white">
+                  <h2 className="text-[29px] leading-tight font-thin text-white">
                     <span className="md:block md:whitespace-nowrap">Apple</span>
                     <span className="md:block md:whitespace-nowrap">
                       Vision <span className="font-bold">Pro</span>
                     </span>
                   </h2>
-                  <p
-                    dir="ltr"
-                    className="font-sans text-[14px] font-medium whitespace-nowrap text-[#909090]"
-                  >
-                    An immersive way to <br /> experience entertainment
+                  <p className="text-center text-sm font-medium whitespace-nowrap text-[#909090] md:text-right">
+                    سرگرمی را آن‌طور که هست <br />
+                    حس کن.
                   </p>
                 </div>
 

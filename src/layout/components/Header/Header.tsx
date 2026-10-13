@@ -124,7 +124,7 @@ const Header = (): ReactElement => {
               return (
                 <li className="" key={item.id}>
                   <SubLink
-                    className="flex items-center gap-2 text-[16px] text-white/30 transition-colors duration-300 hover:text-white"
+                    className="flex items-center gap-2 text-[16px] text-[#909090] transition-colors duration-300 hover:text-white"
                     href={item.href}
                   >
                     <Icon className="h-6 w-6 shrink-0" />
@@ -248,7 +248,9 @@ const Header = (): ReactElement => {
                     <Cart1 className="size-5" />
                   </span>
 
-                  <span className="text-center text-[11px]">سبد خرید</span>
+                  <Link href="/cart" className="text-center text-[11px]">
+                    سبد خرید
+                  </Link>
                 </button>
 
                 {/* User */}
@@ -261,7 +263,9 @@ const Header = (): ReactElement => {
                     <User className="size-5" />
                   </span>
 
-                  <span className="text-center text-[11px]">حساب کاربری</span>
+                  <Link href="/auth" className="text-center text-[11px]">
+                    حساب کاربری
+                  </Link>
                 </button>
               </div>
             </motion.div>

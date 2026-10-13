@@ -25,10 +25,14 @@ const Header = (): ReactElement => {
 
   useEffect(() => {
     const handleScroll = (): void => {
-      setIscrolled(window.scrollY > 10);
+      setIscrolled(window.scrollY > 20);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -41,10 +45,8 @@ const Header = (): ReactElement => {
 
       <header
         className={clsx(
-          'py-4 transition-all duration-300',
-          isScrolled
-            ? 'glass fixed top-0 z-50 w-full border-b border-b-white/30'
-            : ''
+          'sticky top-0 z-50 py-2 transition-colors duration-300',
+          isScrolled ? 'glass border-b border-b-white/30' : ''
         )}
       >
         <nav className="contentWrapper flex h-14 items-center justify-between gap-8 px-4 md:justify-normal">

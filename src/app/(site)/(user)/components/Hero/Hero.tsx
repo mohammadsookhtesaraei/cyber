@@ -11,7 +11,7 @@ import Iphone from '@/assets/images/18pro.webp';
 
 const Hero = (): ReactElement => {
   return (
-    <section className="relative bg-red-300 pt-23 pb-0">
+    <section className="relative overflow-hidden bg-red-300 pt-23 pb-0">
       <div className="absolute inset-0 bg-linear-to-r from-[#211C24] to-[#211C24]"></div>
       {/* container */}
       <div className="contentWrapper relative">

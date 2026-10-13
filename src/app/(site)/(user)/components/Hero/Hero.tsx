@@ -42,7 +42,7 @@ const Hero = (): ReactElement => {
               Created to change everything for the better. For everyone
             </p>
             <Link
-              className="hover:text-primary self-center rounded-md border border-white bg-transparent px-14 py-4 text-white transition-all duration-300 hover:bg-white md:self-end"
+              className="hover:text-primary active:text-primary self-center rounded-md border border-white bg-transparent px-14 py-4 text-white transition-all duration-300 hover:bg-white active:bg-white md:self-end"
               href="/product"
             >
               Shop Now

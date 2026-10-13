@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { ReactElement } from 'react';
 
+import RevealCard from '@/app/(site)/(user)/components/ProductGrid/components/RevalCard';
 import ps5Desk from '@/assets/images/PlayStation.webp';
 import airpodMobile from '@/assets/images/airpodfull.webp';
 import airPodDesk from '@/assets/images/headphone.webp';
@@ -17,7 +18,8 @@ const ProductGrid = (): ReactElement => {
     <section className="">
       <div className="flex flex-col md:flex-row">
         {/* right: MacBook */}
-        <div className="group order-2 w-full overflow-hidden bg-[#EDEDED] md:order-1">
+
+        <RevealCard className="group order-2 w-full overflow-hidden bg-[#EDEDED] md:order-1">
           <div className="flex h-full w-full flex-col items-center bg-[#EDEDED] py-11 pr-4 pl-4 transition-transform duration-300 group-hover:scale-105 md:order-1 md:flex-row md:pr-0 md:pl-14">
             <div className="md:hidden">
               <Image
@@ -51,19 +53,20 @@ const ProductGrid = (): ReactElement => {
                 with a spacious Liquid Retina display.
               </p>
               <Link
-                className="hover:text-primary w-full rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white md:w-fit md:self-end md:px-14"
+                className="hover:text-primary active:text-primary w-full rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white active:bg-white md:w-fit md:self-end md:px-14"
                 href="/product"
               >
                 Shop Now
               </Link>
             </div>
           </div>
-        </div>
+        </RevealCard>
 
         {/* left */}
         <div className="order-1 flex w-full flex-col overflow-hidden text-left md:order-2">
           {/* top: PS5 */}
-          <div className="group order-2 w-full overflow-hidden bg-white md:order-1">
+
+          <RevealCard className="group order-2 w-full overflow-hidden bg-white md:order-1">
             <div className="flex h-full w-full flex-col items-center py-10 pr-4 pl-4 transition-transform duration-300 group-hover:scale-105 md:flex-row md:py-0 md:pr-12 md:pl-0">
               <div className="order-2 flex flex-col items-center gap-4 text-center md:order-0">
                 <h2 className="font-sans text-[34px] font-medium text-black md:text-6xl">
@@ -97,12 +100,13 @@ const ProductGrid = (): ReactElement => {
                 />
               </div>
             </div>
-          </div>
+          </RevealCard>
 
           {/* bottom */}
           <div className="order-1 flex flex-1 flex-col overflow-hidden md:order-2 md:flex-row">
             {/* AirPods */}
-            <div className="group order-1 w-full overflow-hidden bg-[#EDEDED] md:order-2 md:w-1/2">
+
+            <RevealCard className="group order-1 w-full overflow-hidden bg-[#EDEDED] md:order-2 md:w-1/2">
               <div className="flex h-full w-full flex-col items-center gap-5 py-10 pr-4 pl-4 text-center transition-transform duration-300 group-hover:scale-105 md:flex-row md:gap-0 md:py-0 md:pr-12 md:pl-0 md:text-left">
                 <div className="order-2 flex w-full flex-col gap-2 md:order-0 md:max-w-40">
                   <h2 className="font-sans text-[34px] leading-tight font-thin text-black md:text-[29px]">
@@ -143,10 +147,10 @@ const ProductGrid = (): ReactElement => {
                   />
                 </div>
               </div>
-            </div>
+            </RevealCard>
 
             {/* Vision Pro */}
-            <div className="group order-2 w-full overflow-hidden bg-[#353535] md:order-1 md:w-1/2">
+            <RevealCard className="group order-2 w-full overflow-hidden bg-[#353535] md:order-1 md:w-1/2">
               <div className="flex h-full w-full flex-col items-center gap-4 py-10 pr-4 pl-4 text-center transition-transform duration-300 group-hover:scale-105 md:flex-row md:py-0 md:pr-12 md:pl-0 md:text-left">
                 <div className="order-2 flex w-full flex-col gap-2 md:order-0 md:max-w-40">
                   <h2 className="font-sans text-[29px] leading-tight font-thin text-white">
@@ -187,7 +191,7 @@ const ProductGrid = (): ReactElement => {
                   />
                 </div>
               </div>
-            </div>
+            </RevealCard>
           </div>
         </div>
       </div>

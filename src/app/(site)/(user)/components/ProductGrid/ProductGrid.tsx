@@ -26,6 +26,7 @@ const ProductGrid = (): ReactElement => {
                 alt="macbook"
                 height={200}
                 width={330}
+                loading="lazy"
               />
             </div>
             <div className="hidden md:block">
@@ -35,6 +36,7 @@ const ProductGrid = (): ReactElement => {
                 alt="macbook"
                 height={502}
                 width={500}
+                loading="lazy"
               />
             </div>
             <div className="flex w-full flex-col items-center gap-4 justify-self-end text-left">
@@ -59,7 +61,7 @@ const ProductGrid = (): ReactElement => {
         </div>
 
         {/* left */}
-        <div className="order-1 flex w-full flex-col overflow-hidden bg-green-400 text-left md:order-2">
+        <div className="order-1 flex w-full flex-col overflow-hidden text-left md:order-2">
           {/* top: PS5 */}
           <div className="group order-2 w-full overflow-hidden bg-white md:order-1">
             <div className="flex h-full w-full flex-col items-center py-10 pr-4 pl-4 transition-transform duration-300 group-hover:scale-105 md:flex-row md:py-0 md:pr-12 md:pl-0">
@@ -80,6 +82,7 @@ const ProductGrid = (): ReactElement => {
                   alt="ps5"
                   height={324}
                   width={500}
+                  loading="lazy"
                 />
               </div>
               <div className="order-1 md:hidden">
@@ -90,13 +93,14 @@ const ProductGrid = (): ReactElement => {
                   alt="ps5"
                   height={200}
                   width={200}
+                  loading="lazy"
                 />
               </div>
             </div>
           </div>
 
           {/* bottom */}
-          <div className="order-1 flex flex-col overflow-hidden md:order-2 md:flex-row">
+          <div className="order-1 flex flex-1 flex-col overflow-hidden md:order-2 md:flex-row">
             {/* AirPods */}
             <div className="group order-1 w-full overflow-hidden bg-[#EDEDED] md:order-2 md:w-1/2">
               <div className="flex h-full w-full flex-col items-center gap-5 py-10 pr-4 pl-4 text-center transition-transform duration-300 group-hover:scale-105 md:flex-row md:gap-0 md:py-0 md:pr-12 md:pl-0 md:text-left">
@@ -123,6 +127,7 @@ const ProductGrid = (): ReactElement => {
                     alt="airpod"
                     height={272}
                     width={245}
+                    loading="lazy"
                   />
                 </div>
 
@@ -134,6 +139,7 @@ const ProductGrid = (): ReactElement => {
                     alt="airpod"
                     height={200}
                     width={192}
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -165,6 +171,7 @@ const ProductGrid = (): ReactElement => {
                     alt="visuon"
                     height={272}
                     width={245}
+                    loading="lazy"
                   />
                 </div>
 
@@ -176,6 +183,7 @@ const ProductGrid = (): ReactElement => {
                     alt="visuon"
                     height={192}
                     width={325}
+                    loading="lazy"
                   />
                 </div>
               </div>

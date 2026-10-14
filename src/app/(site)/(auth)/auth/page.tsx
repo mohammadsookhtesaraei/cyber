@@ -63,7 +63,13 @@ const AuthPage = (): ReactElement => {
   const handleSendtOtp = async (values: SendOtpFormType): Promise<void> => {
     try {
       const { message, otp } = await mutateAsync(values.phoneNumber);
-      toast.success(`${message}-${otp}`, { duration: 6000 });
+      if (otp) {
+        toast.success(`کد تأیید آزمایشی: ${otp}`, {
+          duration: 6000,
+        });
+      } else {
+        toast.success(message || 'درخواست کد تأیید ثبت شد');
+      }
       setCount(resend);
       setStep(2);
     } catch (error) {
@@ -127,7 +133,13 @@ const AuthPage = (): ReactElement => {
   const resendOtpCode = async (): Promise<void> => {
     const phoneNumber = getValues('phoneNumber');
     const { message, otp } = await mutateAsync(phoneNumber);
-    toast.success(`${message}-${otp}`, { duration: 6000 });
+    if (otp) {
+      toast.success(`کد تأیید آزمایشی: ${otp}`, {
+        duration: 6000,
+      });
+    } else {
+      toast.success(message || 'درخواست کد تأیید ثبت شد');
+    }
     setCount(resend);
     reset();
   };

@@ -171,8 +171,11 @@ export async function POST(req: Request) {
       userId: user._id.toString(),
     };
 
-    // فقط در محیط توسعه؛ هرگز در Production کد را برنگردان.
-    if (process.env.NODE_ENV !== 'production') {
+    // فقط برای دمو و نمونه‌کار
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      process.env.OTP_DEMO_MODE === 'true'
+    ) {
       response.otp = otp;
     }
 

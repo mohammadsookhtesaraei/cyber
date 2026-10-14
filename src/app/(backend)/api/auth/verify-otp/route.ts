@@ -20,185 +20,206 @@ const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 
 export async function POST(req: Request) {
   try {
-    // Connect to database
     await connectDb();
 
-    // Get request body
-    const body = await req.json();
-    const { phoneNumber, otp } = body;
+    let body: unknown;
 
-    // Validate request
-    if (!phoneNumber || !otp) {
+    try {
+      body = await req.json();
+    } catch {
       return NextResponse.json(
-        {
-          message: 'شماره موبایل و کد تایید الزامی است',
-        },
-        {
-          status: 400,
-        }
+        { message: 'بدنه درخواست معتبر نیست' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      !('phoneNumber' in body) ||
+      !('otp' in body) ||
+      typeof body.phoneNumber !== 'string' ||
+      typeof body.otp !== 'string'
+    ) {
+      return NextResponse.json(
+        { message: 'شماره موبایل و کد تأیید الزامی است' },
+        { status: 400 }
+      );
+    }
+
+    const phoneNumber = body.phoneNumber.trim();
+    const otp = body.otp.trim();
+
+    if (!/^\+?[0-9]{10,15}$/.test(phoneNumber)) {
+      return NextResponse.json(
+        { message: 'فرمت شماره موبایل معتبر نیست' },
+        { status: 400 }
+      );
+    }
+
+    if (!/^[0-9]{6}$/.test(otp)) {
+      return NextResponse.json(
+        { message: 'کد تأیید باید شامل ۶ رقم باشد' },
+        { status: 400 }
       );
     }
 
     const now = new Date();
 
-    // Find OTP verification rate limit
     let rateLimit = await OtpVerifyRateLimit.findOne({
       phoneNumber,
     });
 
-    // Create rate limit record if it does not exist
     if (!rateLimit) {
-      rateLimit = await OtpVerifyRateLimit.create({
-        phoneNumber,
-        attemptCount: 0,
-        windowStart: now,
-      });
+      try {
+        rateLimit = await OtpVerifyRateLimit.create({
+          phoneNumber,
+          attemptCount: 0,
+          windowStart: now,
+        });
+      } catch (error) {
+        if (
+          typeof error !== 'object' ||
+          error === null ||
+          !('code' in error) ||
+          error.code !== 11000
+        ) {
+          throw error;
+        }
+
+        rateLimit = await OtpVerifyRateLimit.findOne({
+          phoneNumber,
+        });
+
+        if (!rateLimit) throw error;
+      }
     }
 
-    // Calculate current rate-limit window
-    const timeSinceWindowStart =
-      now.getTime() - rateLimit.windowStart.getTime();
+    let timeSinceWindowStart = now.getTime() - rateLimit.windowStart.getTime();
 
-    // Reset attempts if window has expired
     if (timeSinceWindowStart >= OTP_VERIFY_WINDOW_MS) {
       rateLimit.attemptCount = 0;
       rateLimit.windowStart = now;
-
       await rateLimit.save();
+
+      timeSinceWindowStart = 0;
     }
 
-    // Check maximum verification attempts
     if (rateLimit.attemptCount >= MAX_OTP_VERIFY_ATTEMPTS) {
-      const retryAfter = Math.ceil(
-        (OTP_VERIFY_WINDOW_MS - timeSinceWindowStart) / 1000
+      const retryAfter = Math.max(
+        1,
+        Math.ceil((OTP_VERIFY_WINDOW_MS - timeSinceWindowStart) / 1000)
       );
 
       return NextResponse.json(
         {
-          message:
-            'تعداد تلاش‌های تایید OTP بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید',
+          message: 'تعداد تلاش‌های تأیید بیش از حد مجاز است',
           retryAfter,
         },
-        {
-          status: 429,
-        }
+        { status: 429 }
       );
     }
 
-    // Find user
-    const user = await User.findOne({
-      phoneNumber,
-    });
+    const user = await User.findOne({ phoneNumber });
 
     if (!user) {
       return NextResponse.json(
-        {
-          message: 'کاربری با این شماره پیدا نشد',
-        },
-        {
-          status: 404,
-        }
+        { message: 'کد تأیید نامعتبر یا منقضی شده است' },
+        { status: 400 }
       );
     }
 
-    // Check OTP exists
-    if (!user.otp) {
+    if (!user.otp?.code || !user.otp.expiresIn) {
       return NextResponse.json(
-        {
-          message: 'کد تایید یافت نشد',
-        },
-        {
-          status: 400,
-        }
+        { message: 'کد تأیید یافت نشد؛ لطفاً کد جدید دریافت کنید' },
+        { status: 400 }
       );
     }
 
-    // Hash received OTP
+    if (user.otp.expiresIn.getTime() <= now.getTime()) {
+      return NextResponse.json(
+        { message: 'کد تأیید منقضی شده است؛ لطفاً کد جدید دریافت کنید' },
+        { status: 400 }
+      );
+    }
+
     const hashedOtp = hashOtp(otp);
 
-    // Check OTP
     if (user.otp.code !== hashedOtp) {
-      // Increase failed attempt count
       rateLimit.attemptCount += 1;
-
       await rateLimit.save();
 
-      const remainingAttempts =
-        MAX_OTP_VERIFY_ATTEMPTS - rateLimit.attemptCount;
+      const remainingAttempts = Math.max(
+        0,
+        MAX_OTP_VERIFY_ATTEMPTS - rateLimit.attemptCount
+      );
 
       return NextResponse.json(
         {
-          message: 'کد تایید صحیح نمی باشد',
+          message: 'کد تأیید صحیح نیست',
           remainingAttempts,
         },
         {
-          status: 400,
+          status: remainingAttempts === 0 ? 429 : 400,
         }
       );
     }
 
-    // Check OTP expiration
-    if (now > user.otp.expiresIn) {
+    // مصرف اتمیک کد: فقط یکی از درخواست‌های هم‌زمان موفق می‌شود.
+    const verifiedUser = await User.findOneAndUpdate(
+      {
+        _id: user._id,
+        'otp.code': hashedOtp,
+        'otp.expiresIn': { $gt: now },
+      },
+      {
+        $set: { isVerifiedPhoneNumber: true },
+        $unset: { otp: 1 },
+      },
+      { new: true }
+    );
+
+    if (!verifiedUser) {
       return NextResponse.json(
-        {
-          message: 'کد تایید منقضی شده است',
-        },
-        {
-          status: 400,
-        }
+        { message: 'کد تأیید قبلاً مصرف شده یا منقضی شده است' },
+        { status: 400 }
       );
     }
 
-    // Verify phone number
-    user.isVerifiedPhoneNumber = true;
+    await OtpVerifyRateLimit.deleteOne({ phoneNumber });
 
-    // Remove OTP after successful verification
-    user.otp = undefined;
-
-    await user.save();
-
-    // Reset verification attempts
-    await OtpVerifyRateLimit.deleteOne({
-      phoneNumber,
-    });
-
-    // Get device information
     const userAgent = req.headers.get('user-agent') || undefined;
 
     const forwardedFor = req.headers.get('x-forwarded-for');
-
     const ipAddress = forwardedFor?.split(',')[0]?.trim() || undefined;
 
-    // Generate access token
-    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const accessToken = generateAccessToken(
+      verifiedUser._id.toString(),
+      verifiedUser.role
+    );
 
-    // Generate refresh token
-    const refreshToken = generateRefreshToken(user._id.toString(), user.role);
+    const refreshToken = generateRefreshToken(
+      verifiedUser._id.toString(),
+      verifiedUser.role
+    );
 
-    // Hash refresh token
     const refreshTokenHash = hashRefreshToken(refreshToken);
 
-    // Create session
-    const session = await Session.create({
-      userId: user._id,
+    await Session.create({
+      userId: verifiedUser._id,
       refreshTokenHash,
       userAgent,
       ipAddress,
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000),
     });
 
-    console.log('✅ SESSION CREATED:', session._id);
-    console.log('✅ SESSION HASH:', session.refreshTokenHash);
-
-    // Create response
     const response = NextResponse.json({
-      message: 'شماره موبایل با موفقیت تایید شد',
-      userId: user._id,
-      isVerifiedPhoneNumber: user.isVerifiedPhoneNumber,
-      isActive: user.isActive,
+      message: 'شماره موبایل با موفقیت تأیید شد',
+      userId: verifiedUser._id,
+      isVerifiedPhoneNumber: verifiedUser.isVerifiedPhoneNumber,
+      isActive: verifiedUser.isActive,
     });
 
-    // Access token cookie
     response.cookies.set('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -207,7 +228,6 @@ export async function POST(req: Request) {
       maxAge: ACCESS_TOKEN_MAX_AGE,
     });
 
-    // Refresh token cookie
     response.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -221,12 +241,8 @@ export async function POST(req: Request) {
     console.error('VERIFY OTP ERROR:', error);
 
     return NextResponse.json(
-      {
-        message: 'Something went wrong',
-      },
-      {
-        status: 500,
-      }
+      { message: 'خطایی در پردازش درخواست رخ داد' },
+      { status: 500 }
     );
   }
 }

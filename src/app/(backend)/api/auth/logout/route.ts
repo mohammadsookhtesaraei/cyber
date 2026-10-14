@@ -11,34 +11,33 @@ export async function POST() {
     await connectDb();
 
     const cookieStore = await cookies();
-
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    /*
-     * اگر Refresh Token وجود داشته باشد،
-     * Session مربوط به آن را revoke می‌کنیم.
-     */
     if (refreshToken) {
       const refreshTokenHash = hashRefreshToken(refreshToken);
+      const now = new Date();
 
       await Session.findOneAndUpdate(
         {
-          refreshTokenHash,
           revokedAt: null,
+          $or: [
+            { refreshTokenHash },
+            {
+              previousRefreshTokenHash: refreshTokenHash,
+              previousRefreshTokenExpiresAt: { $gt: now },
+            },
+          ],
         },
         {
           $set: {
-            revokedAt: new Date(),
+            revokedAt: now,
           },
         }
       );
     }
 
-    /*
-     * Cookieها را از Browser حذف می‌کنیم.
-     */
     const response = NextResponse.json({
-      message: 'Logout successful',
+      message: 'با موفقیت از حساب کاربری خارج شدید',
     });
 
     response.cookies.delete('accessToken');
@@ -50,7 +49,7 @@ export async function POST() {
 
     return NextResponse.json(
       {
-        message: 'Something went wrong',
+        message: 'خطایی در خروج از حساب کاربری رخ داد',
       },
       {
         status: 500,

@@ -6,6 +6,7 @@ import { ProductFormValuesType } from '@/types/product-interface';
 
 // user product api
 
+// get product in landing
 export const getAllProducts = async (cookies: string, limit?: number) => {
   try {
     const { data } = await app.get('/products', {
@@ -24,6 +25,13 @@ export const getAllProducts = async (cookies: string, limit?: number) => {
 
     throw error;
   }
+};
+
+// like product
+
+export const likeProduct = async (id: string) => {
+  const { data } = await app.post(`/products/like/${id}`);
+  return data;
 };
 
 // pannel admin services

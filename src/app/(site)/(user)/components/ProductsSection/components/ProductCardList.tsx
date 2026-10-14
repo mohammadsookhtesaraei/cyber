@@ -15,13 +15,14 @@ type ProductListsProps = {
 };
 
 const ProductCardList = async ({ limit }: ProductListsProps) => {
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   const allCookies = await cookies();
 
   const strCookies = toCookieStore(allCookies);
 
   const products = (await getAllProducts(strCookies, limit)) as IProduct[];
+  console.log(products);
 
   return (
     <div className="flex flex-wrap justify-center">

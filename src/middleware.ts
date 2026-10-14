@@ -39,38 +39,35 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  /*
-   * اگر Refresh انجام شده باشد،
-   * Cookie جدید را روی Request قرار می‌دهیم
-   * تا ادامه Request همین Token جدید را ببیند.
-   */
+  // اگر Refresh انجام شده باشد، توکن جدید را روی Request قرار می‌دهیم
   if (tokens) {
     request.cookies.set('accessToken', tokens.accessToken);
-    request.cookies.set('refreshToken', tokens.refreshToken);
+
+    if (tokens.refreshToken) {
+      request.cookies.set('refreshToken', tokens.refreshToken);
+    }
   }
 
-  /*
-   * Response نهایی
-   */
+  // ساخت Response نهایی
   const response = redirectTo
     ? NextResponse.redirect(new URL(redirectTo, request.url))
     : NextResponse.next({
         request,
       });
 
-  /*
-   * Cookie جدید را در Browser ذخیره می‌کنیم.
-   */
+  // ذخیره توکن‌های جدید در مرورگر
   if (tokens) {
     response.cookies.set('accessToken', tokens.accessToken, {
       ...cookieOptions,
       maxAge: 15 * 60,
     });
 
-    response.cookies.set('refreshToken', tokens.refreshToken, {
-      ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60,
-    });
+    if (tokens.refreshToken) {
+      response.cookies.set('refreshToken', tokens.refreshToken, {
+        ...cookieOptions,
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
   }
 
   return response;

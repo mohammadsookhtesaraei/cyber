@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import Button from '@/components/ui/Button/Button';
-
 import { IProduct } from '@/types/product-interface';
 
 import { toPersianNumbersWithComma } from '@/utils/toPersianNumber';
+
+import ProductLiked from '@/app/(site)/(user)/components/ProductsSection/components/ProductLiked';
 
 type ProductCardProps = IProduct;
 
@@ -14,10 +14,12 @@ const ProductCard = ({
   slug,
   price,
   description,
+  _id,
+  isLiked,
 }: ProductCardProps) => {
   return (
     <div className="flex flex-col items-center gap-4 overflow-hidden rounded-[9px] bg-[#F6F6F6] px-4 py-6">
-      <div>like</div>
+      <ProductLiked id={_id} isLiked={isLiked} />
       <div>
         <Image
           className="h-40"

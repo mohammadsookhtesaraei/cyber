@@ -6,7 +6,7 @@ import { API_URL } from '@/configs/global';
 
 interface Tokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 interface ProxyAuthResult {
@@ -38,11 +38,9 @@ const getUser = async (
   }
 };
 
-// دریافت Access Token و Refresh Token جدید
+// دریافت توکن‌های جدید
 const refresh = async (refreshToken: string): Promise<Tokens | null> => {
   try {
-    console.log('REFRESH START');
-
     const res = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: {
@@ -51,15 +49,13 @@ const refresh = async (refreshToken: string): Promise<Tokens | null> => {
       cache: 'no-store',
     });
 
-    console.log('REFRESH RESULT:', res.status);
-
     if (!res.ok) {
       return null;
     }
 
     const cookies = res.headers.getSetCookie();
 
-    const pick = (name: string) =>
+    const pick = (name: string): string | undefined =>
       cookies
         .find((cookie) => cookie.startsWith(`${name}=`))
         ?.split(';')[0]
@@ -68,19 +64,17 @@ const refresh = async (refreshToken: string): Promise<Tokens | null> => {
     const accessToken = pick('accessToken');
     const newRefreshToken = pick('refreshToken');
 
-    if (!accessToken || !newRefreshToken) {
-      console.error('REFRESH COOKIES NOT FOUND');
-
+    if (!accessToken) {
+      console.error('ACCESS TOKEN NOT FOUND');
       return null;
     }
 
     return {
       accessToken,
-      refreshToken: newRefreshToken,
+      ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
     };
   } catch (error) {
     console.error('REFRESH ERROR:', error);
-
     return null;
   }
 };
@@ -95,7 +89,6 @@ export async function proxyAuth(
   if (accessToken) {
     const user = await getUser(accessToken);
 
-    // Access Token معتبر است
     if (user) {
       return {
         user,
@@ -104,8 +97,7 @@ export async function proxyAuth(
     }
   }
 
-  // 2. Access Token نامعتبر است
-  // بنابراین باید Refresh Token را بررسی کنیم
+  // 2. اگر Refresh Token وجود نداشته باشد، کاربر احراز هویت نشده است
   if (!refreshToken) {
     return {
       user: null,
@@ -113,7 +105,7 @@ export async function proxyAuth(
     };
   }
 
-  // 3. دریافت Tokenهای جدید
+  // 3. دریافت توکن جدید
   const tokens = await refresh(refreshToken);
 
   if (!tokens) {
@@ -133,7 +125,7 @@ export async function proxyAuth(
     };
   }
 
-  // 5. کاربر + Tokenهای جدید
+  // 5. بازگرداندن کاربر و توکن‌های جدید
   return {
     user,
     tokens,

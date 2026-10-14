@@ -18,7 +18,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     await connectDb();
 
     const accessToken = request.cookies.get('accessToken')?.value;
-
     const authorization = authorizeRole(accessToken, ['ADMIN']);
 
     if (!authorization.authorized) {
@@ -29,31 +28,34 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        {
-          message: 'شناسه کاربر نامعتبر است',
-        },
+        { message: 'شناسه کاربر نامعتبر است' },
         { status: 400 }
       );
     }
 
-    const body = await request.json();
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { message: 'بدنه درخواست معتبر نیست' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof body !== 'object' || body === null || !('role' in body)) {
+      return NextResponse.json(
+        { message: 'نقش کاربر الزامی است' },
+        { status: 400 }
+      );
+    }
 
     const { role } = body;
 
-    if (role === undefined) {
-      return NextResponse.json(
-        {
-          message: 'نقش کاربر الزامی است',
-        },
-        { status: 400 }
-      );
-    }
-
     if (role !== 'USER' && role !== 'ADMIN') {
       return NextResponse.json(
-        {
-          message: 'نقش کاربر باید USER یا ADMIN باشد',
-        },
+        { message: 'نقش کاربر باید USER یا ADMIN باشد' },
         { status: 400 }
       );
     }
@@ -62,15 +64,26 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     if (!user) {
       return NextResponse.json(
-        {
-          message: 'کاربر موردنظر پیدا نشد',
-        },
+        { message: 'کاربر موردنظر پیدا نشد' },
         { status: 404 }
       );
     }
 
-    user.role = role;
+    if (user._id.toString() === authorization.payload.userId) {
+      return NextResponse.json(
+        { message: 'امکان تغییر نقش حساب کاربری خودتان وجود ندارد' },
+        { status: 400 }
+      );
+    }
 
+    if (user.role === role) {
+      return NextResponse.json(
+        { message: 'نقش کاربر از قبل همین مقدار است' },
+        { status: 200 }
+      );
+    }
+
+    user.role = role;
     await user.save();
 
     return NextResponse.json(
@@ -91,9 +104,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     console.error('PATCH user role error:', error);
 
     return NextResponse.json(
-      {
-        message: 'خطایی در پردازش درخواست رخ داد',
-      },
+      { message: 'خطایی در پردازش درخواست رخ داد' },
       { status: 500 }
     );
   }

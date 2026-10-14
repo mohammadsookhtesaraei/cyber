@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { PropsWithChildren, ReactElement, ReactNode } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -42,7 +42,7 @@ const CategoryCard = ({ data, i }: CategoryCardProps): ReactElement => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-50px' }}
         transition={{ duration: 0.5, delay: i * 0.07 }}
-        className="h-32 w-40 cursor-pointer rounded-[15px] bg-[#EDEDED] px-13 py-6 transition-colors duration-300 hover:bg-[#909090] hover:text-white"
+        className="cursor-pointer rounded-[15px] bg-[#EDEDED] px-13 py-6 transition-colors duration-300 hover:bg-[#909090] hover:text-white"
       >
         <div className="flex flex-col items-center gap-2">
           <Icon className="h-12 w-12" />

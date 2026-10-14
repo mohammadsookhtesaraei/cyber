@@ -1,6 +1,30 @@
+import axios from 'axios';
+
 import app from '@/services/httpService';
 
 import { ProductFormValuesType } from '@/types/product-interface';
+
+// user product api
+
+export const getAllProducts = async (cookies: string, limit?: number) => {
+  try {
+    const { data } = await app.get('/products', {
+      params: limit !== undefined ? { limit } : {},
+      headers: {
+        Cookie: cookies,
+      },
+    });
+
+    return data.products;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.log('Status:', error.response?.status);
+      console.log('Response:', error.response?.data);
+    }
+
+    throw error;
+  }
+};
 
 // pannel admin services
 

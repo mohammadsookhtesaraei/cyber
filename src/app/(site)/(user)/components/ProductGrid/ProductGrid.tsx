@@ -50,7 +50,7 @@ const ProductGrid = (): ReactElement => {
                 بیشتری برای هر آنچه دوست دارید فراهم می‌کند.
               </p>
               <Link
-                className="hover:text-primary active:text-primary w-full rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white active:bg-white md:w-fit md:self-start md:px-14"
+                className="hover:text-primary active:text-primary w-full self-center rounded-md border border-black bg-transparent py-4 text-center text-black transition-all duration-300 hover:bg-white active:bg-white md:w-fit md:self-start md:px-14"
                 href="/product"
               >
                 مشاهده و خرید

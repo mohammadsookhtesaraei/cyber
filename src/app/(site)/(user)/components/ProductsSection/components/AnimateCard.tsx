@@ -1,0 +1,20 @@
+'use client';
+
+import { ReactNode } from 'react';
+
+import { motion } from 'framer-motion';
+
+const AnimateCard = ({ children, i }: { children: ReactNode; i: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, delay: i * 0.07 }}
+      className="w-6/12 p-2 md:w-3/12"
+    >
+      {children}
+    </motion.div>
+  );
+};
+export default AnimateCard;

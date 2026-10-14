@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 import connectDb from '@/utils/connectDb';
 
+import Category from '@/model/Category';
 import Product from '@/model/Product';
 
 type SortType = 'newest' | 'oldest' | 'price-asc' | 'price-desc' | 'rating';
@@ -299,7 +300,11 @@ export async function GET(request: Request) {
 
     const [products, total] = await Promise.all([
       Product.find(query)
-        .populate('category', 'title englishTitle icon parentId')
+        .populate({
+          path: 'category',
+          model: Category,
+          select: 'title englishTitle icon parentId',
+        })
         .sort(sort)
         .skip(skip)
         .limit(limit)
@@ -307,7 +312,6 @@ export async function GET(request: Request) {
 
       Product.countDocuments(query),
     ]);
-
     // =====================================================
     // Pagination Info
     // =====================================================

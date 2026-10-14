@@ -21,7 +21,7 @@ const TitleCard = () => {
         پرو. فراتر از همه.
       </motion.h2>
       <h1 className="text-8xl font-thin text-white md:whitespace-nowrap">
-        ایفون 18<span className="font-bold">پرو</span>
+        آیفون 18<span className="font-bold">پرو</span>
       </h1>
       <p className="text-sm font-medium text-[#909090]">
         ساخته شده تا همه چیز را بهتر کند. برای همه.

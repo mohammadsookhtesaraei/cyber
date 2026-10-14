@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
   },
   allowedDevOrigins: ['192.168.1.103'],
+  images: {
+    qualities: [50, 75, 100],
+  },
 };
 
 export default nextConfig;

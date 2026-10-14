@@ -16,7 +16,7 @@ import { Cart1, Favorites, Search, User } from '@/components/icons';
 import NavLink from '@/layout/components/Header/components/NavLink';
 import SubLink from '@/layout/components/Header/components/SubLink';
 
-import Logo from '@/assets/images/Logo.webp';
+import Logo from '@/assets/images/Logo.svg';
 import { navData, subNavData } from '@/constant/navData';
 
 const Header = (): ReactElement => {
@@ -105,12 +105,15 @@ const Header = (): ReactElement => {
           {/* log */}
           <div className="shrink-0">
             <Image
-              className="h-auto w-23.75 shrink-0"
+              className="h-7 w-23.75 shrink-0"
               src={Logo}
               width={95}
               height={28}
-              loading="eager"
               alt="logo"
+              quality={100}
+
+              priority
+              unoptimized
             />
           </div>
         </nav>

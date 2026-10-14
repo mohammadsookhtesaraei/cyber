@@ -15,7 +15,7 @@ type NavData = {
   text: string;
 };
 
-type SubNav = {
+export type SubNav = {
   id: string;
   href: string;
   text: string;

@@ -28,7 +28,7 @@ const ProductGrid = (): ReactElement => {
                 alt="macbook"
                 height={200}
                 width={330}
-                loading="lazy"
+                priority
               />
             </div>
             <div className="hidden md:block">
@@ -83,7 +83,7 @@ const ProductGrid = (): ReactElement => {
                   alt="ps5"
                   height={324}
                   width={500}
-                  loading="lazy"
+                  priority
                 />
               </div>
               <div className="order-1 md:hidden">
@@ -126,13 +126,13 @@ const ProductGrid = (): ReactElement => {
                     alt="airpod"
                     height={272}
                     width={245}
-                    loading="lazy"
+                    priority
                   />
                 </div>
 
                 <div className="order-1 md:hidden">
                   <Image
-                    className="h-68 w-full max-w-61.25 object-contain object-left"
+                    className="h-auto w-auto object-contain object-left"
                     quality={100}
                     src={airpodMobile}
                     alt="airpod"
@@ -168,7 +168,7 @@ const ProductGrid = (): ReactElement => {
                     alt="visuon"
                     height={272}
                     width={245}
-                    loading="lazy"
+                    priority
                   />
                 </div>
 

@@ -13,9 +13,9 @@ const ProductCard = ({
   imageLink,
   slug,
   price,
-  description,
   _id,
   isLiked,
+  title,
 }: ProductCardProps) => {
   return (
     <div className="flex flex-col items-center gap-4 overflow-hidden rounded-[9px] bg-[#F6F6F6] px-4 py-6">
@@ -30,10 +30,12 @@ const ProductCard = ({
         />
       </div>
       <div className="flex flex-col items-center gap-4">
-        <p className="text-sm whitespace-nowrap">{description}</p>
-        <p className="text-center">{toPersianNumbersWithComma(price)}تومان</p>
+        <p className="whitespace-nowrap md:text-sm">{title}</p>
+        <p className="text-center text-sm md:text-base">
+          {toPersianNumbersWithComma(price)}تومان
+        </p>
         <Link
-          className="rounded-md bg-black px-2 py-3 whitespace-nowrap text-white md:px-6"
+          className="rounded-md bg-black px-6 py-3 whitespace-nowrap text-white"
           href={`/products/${slug}`}
         >
           مشاهده جزییات محصول

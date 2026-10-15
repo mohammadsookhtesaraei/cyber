@@ -20,7 +20,7 @@ const TitleCard = () => {
       >
         پرو. فراتر از همه.
       </motion.h2>
-      <h1 className="text-8xl font-thin text-white md:whitespace-nowrap">
+      <h1 className="text-6xl font-thin text-white md:whitespace-nowrap lg:text-8xl">
         آیفون 18<span className="font-bold">پرو</span>
       </h1>
       <p className="text-sm font-medium text-[#909090]">

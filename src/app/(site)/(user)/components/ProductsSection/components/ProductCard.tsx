@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import ProductLiked from './ProductLiked';
+
 import { IProduct } from '@/types/product-interface';
 
 import { toPersianNumbersWithComma } from '@/utils/toPersianNumber';
-
-import ProductLiked from '@/app/(site)/(user)/components/ProductsSection/components/ProductLiked';
 
 type ProductCardProps = IProduct;
 

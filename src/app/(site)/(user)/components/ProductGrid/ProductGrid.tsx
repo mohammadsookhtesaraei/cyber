@@ -16,7 +16,7 @@ import visDesk from '@/assets/images/visuon.webp';
 const ProductGrid = (): ReactElement => {
   return (
     <section className="">
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col lg:flex-row">
         {/* right: MacBook */}
 
         <RevealCard className="group order-2 w-full overflow-hidden bg-[#EDEDED] md:order-1">

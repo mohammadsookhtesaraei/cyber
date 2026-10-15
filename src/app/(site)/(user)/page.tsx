@@ -1,4 +1,5 @@
 import CategoriesBrowsers from './components/CategoriesBrowsers/CategoriesBrowsers';
+import DisCountSection from './components/DisCountSection/DisCountSection';
 import Hero from './components/Hero/Hero';
 import ProductGrid from './components/ProductGrid/ProductGrid';
 import ProductsSection from './components/ProductsSection/ProductsSection';
@@ -12,6 +13,7 @@ const HomePage = async () => {
       <CategoriesBrowsers />
       <ProductsSection />
       <SliderSection />
+      <DisCountSection />
     </div>
   );
 };

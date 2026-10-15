@@ -45,11 +45,12 @@ const BookSlider = () => {
             >
               <div className="w-full">
                 <Image
-                  className="h-60 object-cover"
+                  className="h-60 w-full md:w-50"
                   src={item.img}
                   width={200}
                   height={200}
                   alt={item.title}
+                  quality={100}
                   style={{ justifySelf: item.self }}
                 />
               </div>

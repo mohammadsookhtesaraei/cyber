@@ -8,7 +8,9 @@ const CategoriesBrowsers = (): ReactElement => {
   return (
     <section className="bg-[#FAFAFA] py-16 md:py-20">
       <div className="contentWrapper">
-        <h2 className="mb-8 text-2xl font-medium">دسته بندی ها</h2>
+        <h2 className="mb-8 text-2xl font-medium underline decoration-2 underline-offset-8">
+          دسته بندی ها
+        </h2>
         <div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-6 md:gap-2">
             {categoryList.map((item, index) => {

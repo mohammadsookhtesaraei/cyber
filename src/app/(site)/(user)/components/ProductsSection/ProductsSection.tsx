@@ -7,7 +7,9 @@ const ProductsSection = (): ReactElement => {
   return (
     <section className="py-14">
       <div className="contentWrapper">
-        <h2 className="mb-8 text-2xl font-medium">جدید ترین محصولات</h2>
+        <h2 className="mb-8 text-2xl font-medium underline decoration-2 underline-offset-8">
+          جدید ترین محصولات
+        </h2>
         <Suspense fallback={<PlaceHodlderProductCard count={4} />}>
           <ProductLists limit={4} />
         </Suspense>

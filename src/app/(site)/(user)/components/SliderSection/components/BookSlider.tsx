@@ -45,7 +45,7 @@ const BookSlider = () => {
             >
               <div className="w-full">
                 <Image
-                  className="h-60 w-full md:w-50"
+                  className="h-60 w-50"
                   src={item.img}
                   width={200}
                   height={200}

@@ -10,6 +10,13 @@ type TCategory = {
   type: string;
 };
 
+export const getCategories = async () => {
+  const { data } = await app.get('/categories');
+  return data;
+};
+
+// pannel Admin api
+
 // get all category service
 export const getAllCategoryByAdminFn = async () => {
   const { data } = await app.get('/admin/categories');

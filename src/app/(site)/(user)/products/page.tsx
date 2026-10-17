@@ -5,6 +5,8 @@ import ProductLists from './components/ProductLists';
 import queryString from 'query-string';
 import { RotatingLines } from 'react-loader-spinner';
 
+import Breadcrumb from '@/app/(site)/(user)/products/components/Breadcrumb';
+
 export const dynamic = 'force-dynamic';
 
 const products = async ({
@@ -19,7 +21,7 @@ const products = async ({
     <section>
       <div className="contentWrapper">
         {/* address bar */}
-        <div className="bg-green-100 py-10"></div>
+        <Breadcrumb />
 
         <div className="grid min-h-screen grid-cols-1 gap-8 pt-6 md:grid-cols-12">
           <div className="md:col-span-3">

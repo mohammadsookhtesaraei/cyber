@@ -2,9 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { useState } from 'react';
-
-import clsx from 'clsx';
+import { useCallback, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -17,11 +15,55 @@ type ProductFilteProps = {
 };
 
 const ProductFilter = ({ categories }: ProductFilteProps) => {
-  const pathName = usePathname();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleAccordionButtonClick = (): void => {
-    setIsOpen(false);
+  const [selectedCategory, setSelectedCategory] = useState<string[]>(
+    searchParams.get('category')?.split(',').filter(Boolean) || []
+  );
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const param = new URLSearchParams(searchParams.toString());
+
+      if (!value) {
+        param.delete(name);
+      } else {
+        param.set(name, value);
+      }
+
+      return param.toString();
+    },
+    [searchParams]
+  );
+
+  const handleOnChangeSelectedCategory = (
+    e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>
+  ): void => {
+    const { value } = e.target;
+    if (selectedCategory.includes(value)) {
+      const newSelectedCategory = selectedCategory.filter(
+        (item) => item !== value
+      );
+      setSelectedCategory(newSelectedCategory);
+
+      router.push(
+        pathname +
+          '?' +
+          createQueryString('category', newSelectedCategory.join(','))
+      );
+    } else {
+      const newSelectedCategory = [...selectedCategory, value];
+      setSelectedCategory(newSelectedCategory);
+      router.push(
+        pathname +
+          '?' +
+          createQueryString('category', newSelectedCategory.join(','))
+      );
+    }
   };
 
   return (
@@ -29,32 +71,10 @@ const ProductFilter = ({ categories }: ProductFilteProps) => {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={clsx(
-          'group flex w-full items-center justify-between rounded-xl px-4 py-1 text-right transition-all duration-200',
-          isOpen ? 'bg-white/10' : 'bg-transparent',
-          'hover:bg-white/10'
-        )}
+        className="flex w-full items-center justify-between border-b border-b-gray-300"
       >
         <div className="flex items-center gap-3">
-          <span
-            className={clsx(
-              'flex size-9 items-center justify-center rounded-lg bg-white/5 text-lg transition-all duration-200',
-              'group-hover:bg-white/10',
-              isOpen && 'bg-white/10'
-            )}
-          >
-            ایکون فیلتر
-          </span>
-
-          <span
-            className={clsx(
-              'text-sm font-medium transition-colors',
-              isOpen ? 'text-white' : 'text-gray-300',
-              'group-hover:text-white'
-            )}
-          >
-            دسته بندی محصولات
-          </span>
+          <span>دسته بندی محصولات</span>
         </div>
 
         <motion.div
@@ -81,7 +101,23 @@ const ProductFilter = ({ categories }: ProductFilteProps) => {
             }}
             className="overflow-hidden"
           >
-            sssss
+            {categories.map((item) => {
+              return (
+                <div
+                  key={item._id}
+                  className="flex w-full items-center justify-between"
+                >
+                  <label>{item.title}</label>
+                  <input
+                    type="checkbox"
+                    value={item.englishTitle}
+                    name="product-type"
+                    onChange={handleOnChangeSelectedCategory}
+                    checked={selectedCategory.includes(item.englishTitle)}
+                  />
+                </div>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>

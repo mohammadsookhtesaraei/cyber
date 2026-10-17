@@ -24,6 +24,7 @@ const ProductSort = () => {
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
     const { value } = e.target;
+    setIsOpen(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set('sort', value);
@@ -38,9 +39,9 @@ const ProductSort = () => {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
-        className="group flex w-full items-center justify-between border-b border-b-gray-300"
+        className="group flex w-full cursor-pointer items-center justify-between border-b border-b-gray-300"
       >
-        <span>مرتب سازی بر اساس</span>
+        <span className="text-sm">مرتب سازی</span>
 
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}

@@ -18,8 +18,11 @@ interface ProductQuery {
     | { brand: { $regex: string; $options: string } }
     | { tags: { $in: RegExp[] } }
   >;
-  category?: mongoose.Types.ObjectId;
+
+  category?: mongoose.Types.ObjectId | { $in: mongoose.Types.ObjectId[] };
+
   brand?: { $regex: string; $options: string };
+
   offPrice?: {
     $gte?: number;
     $lte?: number;
@@ -45,6 +48,15 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')?.trim() ?? '';
     const brand = searchParams.get('brand')?.trim() ?? '';
 
+    const categoryTitles = [
+      ...new Set(
+        category
+          .split(',')
+          .map((title) => title.trim().toLowerCase())
+          .filter(Boolean)
+      ),
+    ];
+
     const minPriceParam = searchParams.get('minPrice');
     const maxPriceParam = searchParams.get('maxPrice');
 
@@ -52,10 +64,18 @@ export async function GET(request: Request) {
     const limitParam = searchParams.get('limit');
     const sortParam = searchParams.get('sort') ?? 'newest';
 
-    // اعتبارسنجی طول ورودی‌های متنی
+    // اعتبارسنجی ورودی‌های متنی
     if (search.length > 100 || brand.length > 100) {
       return NextResponse.json(
         { message: 'عبارت جست‌وجو یا برند بیش از حد طولانی است' },
+        { status: 400 }
+      );
+    }
+
+    // اعتبارسنجی دسته‌بندی‌ها
+    if (categoryTitles.length > 20) {
+      return NextResponse.json(
+        { message: 'حداکثر ۲۰ دسته‌بندی قابل انتخاب است' },
         { status: 400 }
       );
     }
@@ -114,14 +134,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // اعتبارسنجی دسته‌بندی و مرتب‌سازی
-    if (category && !mongoose.isValidObjectId(category)) {
-      return NextResponse.json(
-        { message: 'شناسه دسته‌بندی نامعتبر است' },
-        { status: 400 }
-      );
-    }
-
+    // اعتبارسنجی مرتب‌سازی
     if (!allowedSorts.includes(sortParam as SortType)) {
       return NextResponse.json(
         { message: 'نوع مرتب‌سازی نامعتبر است' },
@@ -131,7 +144,7 @@ export async function GET(request: Request) {
 
     await connectDb();
 
-    // احراز هویت اختیاری برای تشخیص محصولات پسندیده‌شده
+    // احراز هویت اختیاری برای تشخیص محصولات لایک‌شده
     let userId: string | null = null;
 
     const cookieStore = await cookies();
@@ -148,9 +161,39 @@ export async function GET(request: Request) {
           userId = String(authorization.payload.userId);
         }
       } catch {
-        // کاربران مهمان نیز می‌توانند محصولات را مشاهده کنند.
         userId = null;
       }
+    }
+
+    // تبدیل englishTitle دسته‌بندی‌ها به ObjectId
+    let categoryIds: mongoose.Types.ObjectId[] = [];
+
+    if (categoryTitles.length > 0) {
+      const categories = await Category.find({
+        englishTitle: { $in: categoryTitles },
+      })
+        .select('_id englishTitle')
+        .lean();
+
+      const foundTitles = new Set(
+        categories.map((item) => item.englishTitle.toLowerCase())
+      );
+
+      const missingTitles = categoryTitles.filter(
+        (title) => !foundTitles.has(title)
+      );
+
+      if (missingTitles.length > 0) {
+        return NextResponse.json(
+          {
+            message: 'یک یا چند دسته‌بندی پیدا نشد',
+            invalidCategories: missingTitles,
+          },
+          { status: 400 }
+        );
+      }
+
+      categoryIds = categories.map((item) => item._id);
     }
 
     // ساخت کوئری محصولات
@@ -186,8 +229,9 @@ export async function GET(request: Request) {
       ];
     }
 
-    if (category) {
-      query.category = new mongoose.Types.ObjectId(category);
+    // پشتیبانی از چند دسته‌بندی به‌صورت هم‌زمان
+    if (categoryIds.length > 0) {
+      query.category = { $in: categoryIds };
     }
 
     if (brand) {
@@ -197,6 +241,7 @@ export async function GET(request: Request) {
       };
     }
 
+    // فیلتر بازه قیمت بر اساس offPrice، مطابق منطق فعلی پروژه
     if (minPrice !== undefined || maxPrice !== undefined) {
       query.offPrice = {};
 
@@ -214,15 +259,15 @@ export async function GET(request: Request) {
 
     switch (sortParam as SortType) {
       case 'oldest':
-        sort = { createdAt: 1 };
+        sort = { createdAt: 1, _id: 1 };
         break;
 
       case 'price-asc':
-        sort = { offPrice: 1, _id: 1 };
+        sort = { price: 1, _id: 1 };
         break;
 
       case 'price-desc':
-        sort = { offPrice: -1, _id: -1 };
+        sort = { price: -1, _id: -1 };
         break;
 
       case 'rating':
@@ -235,6 +280,7 @@ export async function GET(request: Request) {
         break;
     }
 
+    // صفحه‌بندی
     const skip = (page - 1) * limit;
 
     if (!Number.isSafeInteger(skip)) {
@@ -244,7 +290,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // دریافت محصولات و تعداد کل
+    // دریافت محصولات و تعداد کل به‌صورت هم‌زمان
     const [products, total] = await Promise.all([
       Product.find(query)
         .populate({
@@ -265,7 +311,7 @@ export async function GET(request: Request) {
       const likes = product.likes ?? [];
 
       const isLiked = userId
-        ? likes.some((id: mongoose.Types.ObjectId) => String(id) === userId)
+        ? likes.some((id: mongoose.ObjectId) => String(id) === userId)
         : false;
 
       const { likes: _likes, ...productData } = product;

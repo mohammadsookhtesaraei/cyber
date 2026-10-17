@@ -60,25 +60,48 @@ const ProductSort = () => {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            {sortOption.map((item) => {
-              const id = `sort-${item.id}`;
-              return (
-                <div
-                  key={item.id}
-                  className="flex w-full items-center justify-between"
-                >
-                  <label htmlFor={id}>{item.label}</label>
-                  <input
-                    id={id}
-                    type="radio"
-                    value={item.value}
-                    name="products-sort"
-                    onChange={handleOnChangeSorted}
-                    checked={sorted === item.value}
-                  />
-                </div>
-              );
-            })}
+            <div className="space-y-1 p-3 sm:p-4">
+              {sortOption.map((item) => {
+                const id = `sort-${item.id}`;
+                const isChecked = sorted === item.value;
+
+                return (
+                  <label
+                    key={item.id}
+                    htmlFor={id}
+                    className={`group flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-3 transition-colors ${
+                      isChecked ? 'bg-gray-100' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <span
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? 'font-semibold text-gray-950'
+                          : 'text-gray-600 group-hover:text-gray-900'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+
+                    <input
+                      id={id}
+                      type="radio"
+                      value={item.value}
+                      name="products-sort"
+                      onChange={handleOnChangeSorted}
+                      checked={sorted === item.value}
+                      className="size-4.5 shrink-0 cursor-pointer appearance-none rounded-md border border-gray-300 bg-white transition-all checked:border-gray-900 checked:bg-gray-900 checked:before:block checked:before:text-center checked:before:text-xs checked:before:font-bold checked:before:text-white checked:before:content-['✓'] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                    />
+                  </label>
+                );
+              })}
+
+              {sortOption.length === 0 && (
+                <p className="py-5 text-center text-sm text-gray-500">
+                  دسته‌بندی‌ای برای نمایش وجود ندارد.
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

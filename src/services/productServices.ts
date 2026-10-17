@@ -7,13 +7,20 @@ import { ProductFormValuesType } from '@/types/product-interface';
 // user product api
 
 // get product in landing
-export const getAllProducts = async (cookies: string, limit?: number) => {
+export const getAllProducts = async (
+  cookies: string,
+  { limit, query }: { limit?: number; query?: string } = {}
+) => {
   try {
-    const { data } = await app.get('/products', {
-      params: limit !== undefined ? { limit } : {},
-      headers: {
-        Cookie: cookies,
-      },
+    const params = new URLSearchParams(query ?? '');
+    if (limit !== undefined) params.set('limit', String(limit));
+
+    const qs = params.toString();
+
+    console.log('Final API URL:', `/products${qs ? `?${qs}` : ''}`);
+
+    const { data } = await app.get(`/products${qs ? `?${qs}` : ''}`, {
+      headers: { Cookie: cookies },
     });
 
     return data.products;
@@ -26,7 +33,6 @@ export const getAllProducts = async (cookies: string, limit?: number) => {
     throw error;
   }
 };
-
 // like product
 
 export const likeProduct = async (id: string) => {

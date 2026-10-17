@@ -18,7 +18,7 @@ const ProductCardList = async ({ limit }: ProductListsProps) => {
 
   const strCookies = toCookieStore(allCookies);
 
-  const products = (await getAllProducts(strCookies, limit)) as IProduct[];
+  const products = (await getAllProducts(strCookies, { limit })) as IProduct[];
 
   return (
     <div className="grid grid-cols-[266px] justify-center gap-2 overflow-hidden sm:grid-cols-[repeat(2,minmax(266px,1fr))] lg:grid-cols-[repeat(4,minmax(266px,1fr))]">

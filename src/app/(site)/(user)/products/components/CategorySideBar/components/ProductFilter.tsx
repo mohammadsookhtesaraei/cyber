@@ -77,24 +77,47 @@ const ProductFilter = ({ categories }: ProductFilterProps) => {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            {categories.map((item) => {
-              const id = `category-${item._id}`;
-              return (
-                <div
-                  key={item._id}
-                  className="flex w-full items-center justify-between"
-                >
-                  <label htmlFor={id}>{item.title}</label>
-                  <input
-                    id={id}
-                    type="checkbox"
-                    value={item.englishTitle}
-                    onChange={handleOnChangeSelectedCategory}
-                    checked={selectedCategory.includes(item.englishTitle)}
-                  />
-                </div>
-              );
-            })}
+            <div className="space-y-1 p-3 sm:p-4">
+              {categories.map((item) => {
+                const id = `category-${item._id}`;
+                const isChecked = selectedCategory.includes(item.englishTitle);
+
+                return (
+                  <label
+                    key={item._id}
+                    htmlFor={id}
+                    className={`group flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-3 transition-colors ${
+                      isChecked ? 'bg-gray-100' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <span
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? 'font-semibold text-gray-950'
+                          : 'text-gray-600 group-hover:text-gray-900'
+                      }`}
+                    >
+                      {item.title}
+                    </span>
+
+                    <input
+                      id={id}
+                      type="checkbox"
+                      value={item.englishTitle}
+                      checked={isChecked}
+                      onChange={handleOnChangeSelectedCategory}
+                      className="size-4.5 shrink-0 cursor-pointer appearance-none rounded-md border border-gray-300 bg-white transition-all checked:border-gray-900 checked:bg-gray-900 checked:before:block checked:before:text-center checked:before:text-xs checked:before:font-bold checked:before:text-white checked:before:content-['✓'] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                    />
+                  </label>
+                );
+              })}
+
+              {categories.length === 0 && (
+                <p className="py-5 text-center text-sm text-gray-500">
+                  دسته‌بندی‌ای برای نمایش وجود ندارد.
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

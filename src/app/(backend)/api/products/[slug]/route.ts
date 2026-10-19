@@ -1,41 +1,33 @@
 import { NextResponse } from 'next/server';
 
-import mongoose from 'mongoose';
-
 import connectDb from '@/utils/connectDb';
 
 import Product from '@/model/Product';
 
 interface RouteContext {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { id } = await context.params;
+    const { slug } = await context.params;
+    console.log('Route params:', slug);
 
-    if (!mongoose.isValidObjectId(id)) {
+    if (!slug?.trim()) {
       return NextResponse.json(
-        {
-          message: 'شناسه محصول نامعتبر است',
-        },
+        { message: 'اسلاگ محصول نامعتبر است' },
         { status: 400 }
       );
     }
 
     await connectDb();
 
-    const product = await Product.findById(id).lean();
+    const product = await Product.findOne({ slug }).lean();
 
     if (!product) {
-      return NextResponse.json(
-        {
-          message: 'محصول پیدا نشد',
-        },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'محصول پیدا نشد' }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -46,12 +38,10 @@ export async function GET(_request: Request, context: RouteContext) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('GET /api/products/:id error:', error);
+    console.error('GET /api/products/:slug error:', error);
 
     return NextResponse.json(
-      {
-        message: 'خطا در دریافت محصول',
-      },
+      { message: 'خطا در دریافت محصول' },
       { status: 500 }
     );
   }

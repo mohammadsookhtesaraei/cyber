@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
+import AddToCart from '@/components/ui/AddToCart/AddToCart';
+
 import { IProduct } from '@/types/product-interface';
 
 import { toPersianNumbersWithComma } from '@/utils/toPersianNumber';
@@ -59,7 +61,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
               جزئیات محصول
             </span>
 
-            <h1 className="text-2xl leading-10 font-bold text-neutral-900 sm:text-3xl sm:leading-[3.5rem]">
+            <h1 className="text-2xl leading-10 font-bold text-neutral-900 sm:text-3xl sm:leading-14">
               {product.title}
             </h1>
 
@@ -104,22 +106,8 @@ const ProductPage = async ({ params }: ProductPageProps) => {
             </div>
 
             {/* Add to Cart Buttons */}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                className="flex min-h-13 flex-1 items-center justify-center rounded-xl bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-neutral-700 active:scale-[0.98]"
-              >
-                افزودن به سبد خرید
-              </button>
 
-              <button
-                type="button"
-                aria-label="افزودن به علاقه‌مندی‌ها"
-                className="flex min-h-13 items-center justify-center rounded-xl border border-neutral-200 px-6 py-3 text-sm font-medium text-neutral-700 transition duration-300 hover:border-neutral-900 hover:bg-neutral-50 active:scale-[0.98] sm:flex-none"
-              >
-                افزودن به علاقه‌مندی‌ها
-              </button>
-            </div>
+            <AddToCart product={product} />
 
             <p className="mt-4 text-center text-xs text-neutral-400 sm:text-right">
               خرید آسان و مطمئن از فروشگاه شما

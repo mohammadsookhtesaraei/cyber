@@ -33,7 +33,7 @@ export interface AuthenticatedUser {
   likedProducts: string[];
   Products: string[];
   cart: {
-    products: string[];
+    products: { product: string; quantity: number }[];
     coupon: string;
   };
   createdAt: string;

@@ -8,11 +8,11 @@ const DisCountSection = () => {
   return (
     <section className="py-14">
       <div className="contentWrapper">
-        <h2 className="mb-8 text-2xl font-medium underline decoration-2 underline-offset-8">
+        <h2 className="mb-8 text-sm font-medium underline decoration-2 underline-offset-8 md:text-2xl">
           تخفیفات
         </h2>
         <Suspense fallback={<PlaceHodlderDiscountCard count={4} />}>
-          <DiscountCardList limit={4} />
+          <DiscountCardList limit={12} />
         </Suspense>
       </div>
     </section>

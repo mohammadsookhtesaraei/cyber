@@ -22,9 +22,11 @@ const DiscountCardList = async ({ limit }: ProductListsProps) => {
     products: IProduct[];
   };
 
+  const products = data.products.filter((item) => item.discount > 0);
+
   return (
     <div className="grid grid-cols-[266px] justify-center gap-2 overflow-hidden sm:grid-cols-[repeat(2,minmax(266px,1fr))] lg:grid-cols-[repeat(4,minmax(266px,1fr))]">
-      {data?.products.map((item, index) => (
+      {products.map((item, index) => (
         <AnimateDiscountCard key={item._id} i={index}>
           <DiscountCard {...item} />
         </AnimateDiscountCard>

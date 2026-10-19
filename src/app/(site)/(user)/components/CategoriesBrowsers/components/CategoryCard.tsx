@@ -36,7 +36,7 @@ const CategoryCard = ({ data, i }: CategoryCardProps): ReactElement => {
   const Icon = iconMap[data.icon as keyof typeof iconMap];
 
   return (
-    <Link href={data.href}>
+    <Link href={`/products?category=${data.href}`}>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

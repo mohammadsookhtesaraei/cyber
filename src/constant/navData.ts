@@ -49,13 +49,13 @@ export const navData: NavData[] = [
 export const subNavData: SubNav[] = [
   {
     id: '1',
-    href: 'phone',
+    href: 'mobile',
     text: 'موبایل',
     icon: Phones,
   },
   {
     id: '2',
-    href: 'computers',
+    href: 'pc',
     text: 'کامپیوتر',
     icon: Computers,
   },
@@ -67,7 +67,7 @@ export const subNavData: SubNav[] = [
   },
   {
     id: '4',
-    href: 'camera',
+    href: 'cameras',
     text: 'دوربین',
     icon: MainCamera,
   },

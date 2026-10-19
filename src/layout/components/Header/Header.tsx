@@ -128,7 +128,7 @@ const Header = (): ReactElement => {
                 <li className="" key={item.id}>
                   <SubLink
                     className="flex items-center gap-2 text-[16px] text-[#909090] transition-colors duration-300 hover:text-white"
-                    href={item.href}
+                    href={`/products?category=${item.href}`}
                   >
                     <Icon className="h-6 w-6 shrink-0" />
                     {item.text}{' '}

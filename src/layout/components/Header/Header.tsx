@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { ReactElement, useEffect, useState } from 'react';
 
@@ -16,12 +17,26 @@ import { Cart1, Favorites, Search, User } from '@/components/icons';
 import NavLink from '@/layout/components/Header/components/NavLink';
 import SubLink from '@/layout/components/Header/components/SubLink';
 
+import { useDebounceValue } from '@/hook/useDebounce';
+
 import Logo from '@/assets/images/Logo.svg';
 import { navData, subNavData } from '@/constant/navData';
 
 const Header = (): ReactElement => {
+  const router = useRouter();
+
   const [isMobileOpenMenu, setIsMobileOpenMenu] = useState(false);
   const [isScrolled, setIscrolled] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const searchHandler = (): void => {
+    const query = search.trim();
+    if (!query) {
+      router.push(`/products`);
+      return;
+    }
+    router.push(`/products?search=${encodeURIComponent(query)}`);
+  };
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -99,8 +114,13 @@ const Header = (): ReactElement => {
               dir="rtl"
               className="bg-bg-muted w-full rounded-lg py-4 pr-10 pl-4 text-[14px] focus:outline-none"
               placeholder="جستجو"
+              value={search}
+              onChange={(e) => setSearch(e.target.value.toLowerCase())}
             />
-            <Search className="absolute right-3 bottom-3.5 h-6 w-6" />
+            <Search
+              onClick={searchHandler}
+              className="absolute right-3 bottom-3.5 h-6 w-6 cursor-pointer"
+            />
           </div>
           {/* log */}
           <div className="shrink-0">

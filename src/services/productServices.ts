@@ -23,7 +23,7 @@ export const getAllProducts = async (
       headers: { Cookie: cookies },
     });
 
-    return data.products;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.log('Status:', error.response?.status);

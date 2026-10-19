@@ -12,14 +12,6 @@ const TitleCard = () => {
       transition={{ duration: 0.7, delay: 0.2 }}
       className="flex flex-col gap-6"
     >
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-[25px] font-semibold text-[#909090]"
-      >
-        پرو. فراتر از همه.
-      </motion.h2>
       <h1 className="text-6xl font-thin text-white md:whitespace-nowrap lg:text-8xl">
         آیفون 18<span className="font-bold">پرو</span>
       </h1>

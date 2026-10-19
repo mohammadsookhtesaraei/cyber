@@ -82,7 +82,7 @@ export async function GET(request: Request) {
 
     // اعتبارسنجی صفحه‌بندی
     const page = pageParam === null ? 1 : Number(pageParam);
-    const limit = limitParam === null ? 12 : Number(limitParam);
+    const limit = limitParam === null ? 3 : Number(limitParam);
 
     if (!Number.isSafeInteger(page) || page < 1) {
       return NextResponse.json(

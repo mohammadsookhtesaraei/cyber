@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { ArrowLeft, TicketPercent } from 'lucide-react';
 
 import { IProduct } from '@/types/product-interface';
@@ -66,14 +68,13 @@ const CartSummary = ({ products }: CartSummaryProps) => {
         </span>
       </div>
 
-      <button
-        type="button"
-        disabled={products.length === 0}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+      <Link
+        href={'/cart/checkout'}
+        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         ادامه فرایند خرید
         <ArrowLeft size={18} />
-      </button>
+      </Link>
     </aside>
   );
 };

@@ -13,9 +13,9 @@ import CartItem from '@/app/(site)/(user)/cart/components/CartItem';
 import CartSummary from '@/app/(site)/(user)/cart/components/CartSummary';
 
 const CartPage = () => {
-  const { data, isPending } = useGetProfile();
-  const { data: cartDetail, isLoading, isError } = useGetCart();
-  console.log(cartDetail);
+  const { data } = useGetProfile();
+  const { data: cartDetail, isLoading } = useGetCart();
+
   const { user } = data || {};
 
   if (isLoading) {

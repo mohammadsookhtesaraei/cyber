@@ -14,11 +14,13 @@ import CartSummary from '@/app/(site)/(user)/cart/components/CartSummary';
 
 const CartPage = () => {
   const { data } = useGetProfile();
-  const { data: cartDetail, isLoading } = useGetCart();
+  const { data: cartDetail, isPending, isFetching } = useGetCart();
+  const products = cartDetail?.cart?.products;
+  console.log(products);
 
   const { user } = data || {};
 
-  if (isLoading) {
+  if (isPending || (isFetching && (!products || products.length === 0))) {
     return (
       <div className="flex min-h-50 items-center justify-center">
         <RotatingLines
@@ -29,8 +31,6 @@ const CartPage = () => {
           strokeWidth="3"
           animationDuration="0.75"
           ariaLabel="rotating-lines-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
         />
       </div>
     );

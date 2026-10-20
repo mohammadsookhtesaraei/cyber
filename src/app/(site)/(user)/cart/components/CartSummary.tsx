@@ -17,12 +17,12 @@ const CartSummary = ({ products }: CartSummaryProps) => {
     0
   );
 
-  const totalDiscount = products.reduce(
-    (total, item) =>
-      total +
-      Math.max(0, item.product.price - item.product.offPrice) * item.quantity,
-    0
-  );
+  const totalDiscount = products.reduce((total, { product, quantity }) => {
+    const unitDiscount =
+      product.offPrice > 0 ? Math.max(0, product.price - product.offPrice) : 0;
+
+    return total + unitDiscount * quantity;
+  }, 0);
 
   const shippingCost = 0;
   const total = subtotal - totalDiscount + shippingCost;

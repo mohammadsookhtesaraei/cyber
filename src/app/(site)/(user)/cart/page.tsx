@@ -10,6 +10,7 @@ import { useGetCart } from '@/hook/useCart';
 import { IProduct } from '@/types/product-interface';
 
 import CartItem from '@/app/(site)/(user)/cart/components/CartItem';
+import CartSummary from '@/app/(site)/(user)/cart/components/CartSummary';
 
 const CartPage = () => {
   const { data, isPending } = useGetProfile();
@@ -70,16 +71,23 @@ const CartPage = () => {
   }
 
   return (
-    <div className="contentWrapper">
-      <div className="grid grid-cols-4 gap-4">
-        <div className="col-span-3 flex flex-col gap-2 p-4">
-          {cartDetail.cart.products.map(
-            (item: { product: IProduct; quantity: number }) => (
-              <CartItem key={item.product._id} data={item} />
-            )
-          )}
+    <div className="py-6 sm:py-10">
+      <div className="contentWrapper">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+          {/* Cart Items */}
+          <div className="flex min-w-0 flex-col gap-4 lg:col-span-8">
+            {cartDetail.cart.products.map(
+              (item: { product: IProduct; quantity: number }) => (
+                <CartItem key={item.product._id} data={item} />
+              )
+            )}
+          </div>
+
+          {/* Cart Summary */}
+          <div className="min-w-0 lg:col-span-4">
+            <CartSummary products={cartDetail.cart.products} />
+          </div>
         </div>
-        <div className="col-span-1"></div>
       </div>
     </div>
   );

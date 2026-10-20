@@ -60,7 +60,6 @@ const AddToCart = ({ product }: AddToCartProps) => {
 
   // check before product add in cart. maybe that is in cart. return boolean
   const isinCart = (user: AuthenticatedUser | undefined, product: IProduct) => {
-    console.log(user?.cart?.products);
     return user?.cart?.products.some((p) => p.product === product._id) ?? false;
   };
 

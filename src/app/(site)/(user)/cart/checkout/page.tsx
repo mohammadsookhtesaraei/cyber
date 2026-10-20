@@ -27,7 +27,7 @@ type AppliedCoupon = {
   amount: number;
 };
 
-// ساختار محصولات سبد خرید
+// ساختار هر محصول موجود در سبد خرید
 type CartProduct = {
   product: {
     _id: string;
@@ -78,43 +78,51 @@ const CheckoutPage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // دریافت سبد خرید
-  const { data: cartResponse, isLoading: cartLoading } = useGetCart();
+  // دریافت اطلاعات سبد خرید از React Query
+  const {
+    data: cartResponse,
+    isLoading: cartLoading,
+    isError: cartError,
+    isFetching: cartFetching,
+    refetch: refetchCart,
+    isRefetching: cartRefetching,
+  } = useGetCart();
 
-  // دریافت تابع ثبت سفارش
+  // هوک ثبت سفارش
   const { mutate: createOrder, isPending: orderLoading } = useCreateOrder();
 
-  // نگهداری کد تخفیف و اطلاعات آن
+  // وضعیت کد تخفیف
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(
     null
   );
 
-  // نگهداری مبلغ تخفیف و وضعیت درخواست
+  // وضعیت مبلغ تخفیف و درخواست کوپن
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  // استخراج محصولات با نوع مشخص
+  // تبدیل پاسخ API به ساختار مورد انتظار صفحه
   const typedCartResponse = cartResponse as CartResponse | undefined;
 
+  // استخراج محصولات سبد خرید
   const cartProducts: CartProduct[] = typedCartResponse?.cart?.products ?? [];
 
-  // محاسبه جمع قیمت محصولات
+  // محاسبه جمع قیمت محصولات با درنظرگرفتن قیمت تخفیف‌خورده
   const subtotal = cartProducts.reduce((total, item) => {
     const product = item.product;
 
     if (!product) return total;
 
-    const price =
+    const unitPrice =
       product.offPrice != null && product.offPrice > 0
         ? product.offPrice
         : product.price;
 
-    return total + price * item.quantity;
+    return total + unitPrice * item.quantity;
   }, 0);
 
-  // محاسبه مبلغ نهایی پس از تخفیف
+  // محاسبه مبلغ نهایی پس از کسر کوپن
   const totalAmount = Math.max(0, subtotal - discountAmount);
 
   // اعمال کد تخفیف از طریق API
@@ -132,12 +140,12 @@ const CheckoutPage = () => {
         code: couponCode.trim().toUpperCase(),
       });
 
-      // ذخیره نتیجه تخفیف دریافتی از سرور
+      // ذخیره اطلاعات دریافتی از سرور
       setAppliedCoupon(data.coupon);
       setDiscountAmount(data.discountAmount);
       setCouponCode(data.coupon.code);
 
-      // به‌روزرسانی اطلاعات سبد خرید
+      // به‌روزرسانی اطلاعات سبد خرید در کش React Query
       await queryClient.invalidateQueries({
         queryKey: ['get-cart'],
       });
@@ -158,7 +166,7 @@ const CheckoutPage = () => {
 
       const { data } = await app.delete<{ message?: string }>('/cart/coupon');
 
-      // پاک‌کردن وضعیت تخفیف
+      // پاک‌کردن اطلاعات کوپن از وضعیت محلی
       setAppliedCoupon(null);
       setDiscountAmount(0);
       setCouponCode('');
@@ -176,8 +184,14 @@ const CheckoutPage = () => {
     }
   };
 
-  // ارسال اطلاعات گیرنده برای ثبت سفارش
+  // ارسال اطلاعات گیرنده و ثبت سفارش
   const handleCheckout = (formData: CheckoutFormData) => {
+    // جلوگیری از ثبت سفارش با سبد خالی
+    if (!cartProducts.some((item) => item.product)) {
+      toast.error('سبد خرید شما خالی است.');
+      return;
+    }
+
     createOrder(
       {
         address: {
@@ -191,7 +205,7 @@ const CheckoutPage = () => {
       },
       {
         onSuccess: (data: OrderResponse) => {
-          // استخراج شناسه سفارش
+          // استخراج شناسه سفارش از پاسخ API
           const orderId = data.order?._id ?? data.orderId;
 
           if (!orderId) {
@@ -206,21 +220,65 @@ const CheckoutPage = () => {
     );
   };
 
-  // نمایش وضعیت دریافت سبد خرید
-  if (cartLoading) {
-    return <p className="p-6">در حال دریافت اطلاعات سبد خرید...</p>;
+  // هنگام دریافت اولیه اطلاعات، پیام خالی بودن سبد را نشان نده
+  if (cartLoading || (!cartResponse && cartFetching)) {
+    return (
+      <main dir="rtl" className="mx-auto max-w-6xl p-4">
+        <div className="animate-pulse space-y-5">
+          <div className="h-8 w-48 rounded-lg bg-gray-200" />
+          <div className="h-32 rounded-xl bg-gray-100" />
+          <div className="h-64 rounded-xl bg-gray-100" />
+        </div>
+      </main>
+    );
   }
 
-  // جلوگیری از ثبت سفارش با سبد خالی
-  if (!cartProducts.length) {
-    return <p className="p-6">سبد خرید شما خالی است.</p>;
+  // نمایش خطا در صورت ناموفق بودن دریافت سبد خرید
+  if (cartError) {
+    return (
+      <main dir="rtl" className="mx-auto max-w-3xl p-6 text-center">
+        <p className="mb-4 text-gray-700">
+          دریافت اطلاعات سبد خرید ناموفق بود.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => refetchCart()}
+          disabled={cartRefetching}
+          className="rounded-lg bg-gray-900 px-5 py-3 text-white disabled:opacity-50"
+        >
+          {cartRefetching ? 'در حال تلاش مجدد...' : 'تلاش مجدد'}
+        </button>
+      </main>
+    );
   }
 
+  // فقط پس از دریافت موفق اطلاعات، خالی بودن سبد را بررسی کن
+  if (!cartProducts.some((item) => item.product)) {
+    return (
+      <main dir="rtl" className="mx-auto max-w-3xl p-6 text-center">
+        <p className="text-gray-700">سبد خرید شما خالی است.</p>
+
+        <button
+          type="button"
+          onClick={() => router.push('/cart')}
+          className="mt-4 rounded-lg border px-5 py-3"
+        >
+          بازگشت به سبد خرید
+        </button>
+      </main>
+    );
+  }
+
+  // نمایش صفحه تسویه‌حساب
   return (
-    <main className="mx-auto grid max-w-6xl grid-cols-1 gap-6 p-4 lg:grid-cols-3">
+    <main
+      dir="rtl"
+      className="mx-auto grid max-w-6xl grid-cols-1 gap-6 p-4 lg:grid-cols-3"
+    >
       {/* ستون اطلاعات گیرنده و کد تخفیف */}
       <section className="space-y-6 lg:col-span-2">
-        {/* ورود، اعمال و حذف کد تخفیف */}
+        {/* فرم اعمال و حذف کد تخفیف */}
         <CouponForm
           code={couponCode}
           onCodeChange={(value) => {
@@ -240,7 +298,6 @@ const CheckoutPage = () => {
 
       {/* ستون خلاصه سفارش */}
       <aside>
-        {/* نمایش مبلغ محصولات، تخفیف و مبلغ نهایی */}
         <OrderSummary
           products={cartProducts}
           subtotal={subtotal}
